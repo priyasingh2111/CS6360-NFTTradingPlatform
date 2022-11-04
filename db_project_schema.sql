@@ -6,35 +6,33 @@ create table Trader(
     phone_no varchar(30),
     cell_no varchar(30),
     email varchar(255),
+    street_address varchar(255),
+    zip_code varchar(30),
     login varchar(255) UNIQUE,
     level char(1),
     fiat_balance double,
     ethereum_balance double,
     primary key(client_id),
-    foreign key(ethereum_address) references nft(ethereum_address),
-    foreign key(address_id) references Address(address_id),
+    foreign key(street_address, zip_code) references Address(street_address, zip_code),
     foreign key(login) references User(login)
     on delete no action
 );
 
 create table Address(
-    client_id varchar(255),
-    address_id int AUTO_INCREMENT,
-    street varchar(255),
+    street_address varchar(255),
     city varchar(255),
     state varchar(30),
     zip_code varchar(30),
-    primary key(address_id),
-    foreign key(client_id) references Trader(client_id)
+    primary key(street_address, zip_code),
 );
 
 create table NFT(
     ethereum_address uint(256),
     name varchar(255),
-    nft_address varchar(255),
-    client_id varchar(255),
+    owner_id varchar(255),
+    market_value double,
     primary key(token_id),
-    foreign key(client_id) references Trader(client_id),
+    foreign key(owner_id) references Trader(client_id),
     on delete no action
 );
 
@@ -75,5 +73,6 @@ create table Transaction(
     commission_paid double,
     date date
     primary key(transaction_id),
-    foreign key(client_id) references Trader(client_id)
+    foreign key(ethereum_buyer_address) references Trader(ethereum_address)
+    foreign key(ethereum_seller_address) references Trader(ethereum_address)
 );
