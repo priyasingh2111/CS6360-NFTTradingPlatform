@@ -18,4 +18,5 @@ Manager
 	Logout
 	view dashboard
 		Limit by date
+		Display as a table, if time permits: graph (numpy/pandas)
 	
