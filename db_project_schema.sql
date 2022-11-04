@@ -27,6 +27,7 @@ create table Address(
 );
 
 create table NFT(
+    token_id varchar(255)
     ethereum_address uint(256),
     name varchar(255),
     owner_id varchar(255),
