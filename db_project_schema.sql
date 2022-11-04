@@ -1,5 +1,5 @@
 create table Trader(
-    client_id int AUTO_INCREMENT,
+    client_id varchar(255),
     ethereum_address uint(256) UNIQUE,
     first_name varchar(255),
     last_name varchar(255),
