@@ -65,6 +65,7 @@ create table Manager(
 
 create table Transaction(
     transaction_id varchar(255), 
+    cancelled boolean,
     ethereum_value varchar(255), 
     ethereum_buyer_address varchar(255),
     ethereum_seller_address varchar(255),
