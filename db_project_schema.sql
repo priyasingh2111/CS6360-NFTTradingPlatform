@@ -1,6 +1,20 @@
+create table User(
+    login varchar(255),
+    password varchar(255),
+    primary key(login)
+);
+
+create table Address(
+    street_address varchar(255),
+    city varchar(255),
+    state varchar(30),
+    zip_code varchar(30),
+    primary key(street_address, zip_code)
+);
+
 create table Trader(
     client_id varchar(255),
-    ethereum_address uint(256) UNIQUE,
+    ethereum_address varchar(256) UNIQUE,
     first_name varchar(255),
     last_name varchar(255),
     phone_no varchar(30),
@@ -18,22 +32,14 @@ create table Trader(
     on delete no action
 );
 
-create table Address(
-    street_address varchar(255),
-    city varchar(255),
-    state varchar(30),
-    zip_code varchar(30),
-    primary key(street_address, zip_code),
-);
-
 create table NFT(
-    token_id varchar(255)
-    ethereum_address uint(256),
+    token_id varchar(255),
+    ethereum_address varchar(256),
     name varchar(255),
     owner_id varchar(255),
     market_value double,
     primary key(token_id),
-    foreign key(owner_id) references Trader(client_id),
+    foreign key(owner_id) references Trader(client_id)
     on delete no action
 );
 
@@ -44,17 +50,12 @@ create table Payment(
     payment_address varchar(255),
     amount_paid double,
     cancelled boolean,
-    date date
+    date date,
     primary key(payment_id),
-    foreign key(client_id) references Trader(client_id),
+    foreign key(client_id) references Trader(client_id)
     on delete no action
 );
 
-create table User(
-    login varchar(255),
-    password varchar(255),
-    primary key(login)
-);
 
 create table Manager(
     manager_id varchar(255),
@@ -73,8 +74,8 @@ create table Transaction(
     ethereum_nft_address varchar(255),
     commission_type double,
     commission_paid double,
-    date date
+    date date,
     primary key(transaction_id),
-    foreign key(ethereum_buyer_address) references Trader(ethereum_address)
+    foreign key(ethereum_buyer_address) references Trader(ethereum_address),
     foreign key(ethereum_seller_address) references Trader(ethereum_address)
 );
