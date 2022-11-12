@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+  <link rel="stylesheet" href="{{url_for('static', filename='css/edit.css')}}">
+    <title>Title</title>
+  <style>
+	  body
+         {
+            background-image: url({{url_for('static', filename='images/profile.jpg')}});
+	        background-size: cover;
+ 	        background-attachment: fixed;
+         }
+    </style>
+</head>
+<body>
+  <h2>Edit User Info</h2>
+	<form action = "/edit_user_info" method = "post">
+	<div class = "change">
+	<table>
+	          <tr>
+	          <td>First Name:</td>
+	          <td><input type = "text" name = "first_name" placeholder = " Enter First Name" ></td>
+	          <td></td>
+	          </tr>
+
+	          <tr>
+	          <td>Last Name:</td>
+	          <td><input type = "text" name = "last_name" placeholder = " Enter Last Name" ></td>
+	          <td></td>
+	          </tr>
+
+	          <tr>
+	          <td>Phone Number:</td>
+	          <td><input type = "text" name = "phone_number" placeholder = " Enter Phone Number" ></td>
+	          <td></td>
+	          </tr>
+
+	          <tr>
+	          <td>Cell Number:</td>
+	          <td><input type = "text" name = "cell_phone_number" placeholder = " Enter Cell Number" ></td>
+	          <td></td>
+	          </tr>
+
+		      <tr>
+	          <td>Email:</td>
+	          <td><input type = "text" name = "email" placeholder = " Enter Email" ></td>
+	          <td></td>
+	          </tr>
+
+	 </table>
+	 </div>
+	 <br>
+	 <div class = "edit">
+		<input type = "submit"  name = "submit">
+	</div>
+	</form>
+	<br>
+    <br>
+</body>
+</html>

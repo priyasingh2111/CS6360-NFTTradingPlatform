@@ -23,35 +23,38 @@
 		<tbody>
 			{% for trader in trader_detail%}
 			<tr>
-				<td><a href="#">Edit User Info</a></td>
+				<td><a href="{{url_for('edit_user_info')}}">Edit User Info</a></td>
 			</tr>
 			<tr>
 				<td>Name:</td>
+	          	<td>{{trader[2]}}</td>
 	          	<td>{{trader[3]}}</td>
-	          	<td>{{trader[4]}}</td>
 			</tr>
 			<tr>
 	          	<td>Phone #:</td>
-	          	<td>{{trader[5]}}</td>
+	          	<td>{{trader[4]}}</td>
 	          	<td></td>
 			</tr>
 			<tr>
 	          	<td>Cell Phone #:</td>
-	          	<td>{{trader[6]}}</td>
+	          	<td>{{trader[5]}}</td>
 			</tr>
 			<tr>
 	          	<td>Email:</td>
-	          	<td>{{trader[7]}}</td>
+	          	<td>{{trader[6]}}</td>
 	          	<td></td>
 			</tr>
 			<tr>
+				<td><a href="{{url_for('edit_login')}}">Edit Login Info</a></td>
+			</tr>
+			<tr>
 	          	<td>UserName:</td>
-	          	<td>{{trader[8]}}</td>
+	          	<td>{{trader[9]}}</td>
 	          	<td></td>
 			</tr>
 			<tr>
 	          	<td>Password:</td>
-	          	<td>{{trader[9]}}</td>
+	          	<td>{{trader[14]}}</td>
 	          	<td></td>
 			</tr>
 			<tr>
@@ -61,6 +64,7 @@
 			</tr>
 			<tr>
 				<td><a href="#">Edit Balance</a></td>
+				<td><a href="#">Payment History</a></td>
 			</tr>
 			<tr>
 	          	<td>Fiat Balance:</td>
@@ -77,7 +81,7 @@
 			{% for address in address_detail%}
 
 			<tr>
-				<td><a href="#">Edit Address</a></td>
+				<td><a href="{{url_for('edit_address')}}">Edit Address</a></td>
 			</tr>
 
 			<tr>

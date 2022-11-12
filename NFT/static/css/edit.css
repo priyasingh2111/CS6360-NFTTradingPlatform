@@ -1,0 +1,88 @@
+body {
+  	line-height: 1.25;
+  	font-family: "Times New Roman", Times, serif;
+}
+
+.change a{
+	text-decoration: none;
+	float: right;
+    display: block;
+    background-color: white;
+    color: black;
+    padding: 14px 23px;
+    font-size: 15px;
+    border: 1px solid black;
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-right: 456px;
+    border-radius: 10px 10px 10px 10px;
+}
+
+h2{
+	float: center;
+	text-align:center;
+}
+
+h1{
+  color: red;
+  text-align: center;
+  font-size: 25px;
+  margin: 10px 0 20px 0;
+}
+
+table {
+ 	border: 1px solid black;
+  	border-collapse: collapse;
+  	border-radius: 10px 10px 10px 10px;
+ 	margin: auto;
+  	width: 40%;
+  	height: 80%;
+  	table-layout: fixed;
+}
+table tr {
+	border-radius: 10px 10px 10px 10px;
+  	border: 1px solid black;
+}
+
+table td {
+	padding: 10px;
+  	text-align: left;
+  	color: black
+}
+
+tbody td{
+	color: black;
+	font-size: 20px;
+}
+
+a:hover{
+	background-color: gray;
+}
+
+
+.edit [type=submit]{
+	display: block;
+	text-decoration: none;
+	float: right;
+    color: black;
+    padding: 14px 23px;
+    font-size: 15px;
+    border: 1px solid black;
+    cursor: pointer;
+    margin-right: 456px;
+    border-radius: 10px 10px 10px 10px;
+}
+
+.change [type=text]{
+  display: block;
+  width: 130%;
+  border: 1px solid BLACK;
+  height: 40px;
+  font-size: 10px;
+  color: BLACK;
+  border-radius: 5px 5px 5px 5px;
+}
+
+.change [type=submit]:hover{
+	background-color: gray;
+}
