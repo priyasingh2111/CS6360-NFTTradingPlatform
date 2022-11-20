@@ -358,6 +358,31 @@ def logout():
     session.pop("user_id", None)
     return redirect(url_for("index"))
 
+#transaction_history
+@app.route('/transaction_history')
+def transaction_history():
+    user_id = session["user_id"]
+    #get ethereum address for a client
+    ethereum_address_sql = f"SELECT T.ethereum_address FROM Trader T WHERE T.client_id = %s"
+
+    #get transactions for ethereum address for buy/sell
+    transactions_sql = f"SELECT * FROM Transaction T where T.ethereum_buyer_address = %s or T.ethereum_seller_address = %s"
+    try:
+        # fetch ethereum address
+        cursor.execute(ethereum_address_sql, (user_id))
+        trader_ethereum_address_result = cursor.fetchall()
+        trader_ethereum_address = trader_ethereum_address_result[0][0]
+
+        #fetch transactions
+        cursor.execute(transactions_sql, (trader_ethereum_address, trader_ethereum_address))
+        transactions_result = cursor.fetchall()
+
+        return render_template('transaction_history.html', transaction_details=transactions_result)
+
+    except con.Error as err:
+        # query error
+        print(err.msg)
+    return render_template('transaction_history.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
