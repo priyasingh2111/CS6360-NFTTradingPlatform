@@ -35,6 +35,7 @@
                 <th scope="col">Commission </th>
                 <th scope="col">TimeStamp</th>
                 <th scope="col">Ethereum Value</th>
+                <th scope="col">Cancellation Status</th>
                 <th scope="col">Cancel Transaction</th>
 
             </tr>
@@ -42,12 +43,28 @@
         <tbody>
             {% for transaction in transaction_details %}
             <tr>
-                <td>{{ transaction["ethereum_nft_address"]}}</td>
-                <td>{{ transaction["commission_type"]}}</td>
-                <td>{{ transaction["commission_paid"]}}</td>
-                <td>{{ transaction["date"] }}</td>
-                <td>{{ transaction["ethereum_value"]}}</td>
-                <td>{{ transaction["cancelled"] }}</td>
+                <td>{{ transaction[0]}}</td>
+                <td>{{ transaction[1]}}</td>
+                <td>{{ transaction[2]}}</td>
+                <td>{{ transaction[3]}}</td>
+                <td>{{ transaction[4]}}</td>
+
+                {% set isCancelled = transaction[5] %}
+                {% set notCancelledTxt = "Not Cancelled" %}
+                {% set cancelledTxt = "Cancelled" %}
+
+                {% if isCancelled == 1 %}
+                    <td>{{ cancelledTxt }}</td>
+                {% else %}
+                    <td> {{ notCancelledTxt }} </td>
+                {% endif %}
+
+                {% if isCancelled == 1 %}
+                    <td>{{ cancelledTxt }}</td>
+                {% else %}
+                    <td> <a href="{{url_for('cancel_transaction')}}">Cancel Transaction</a> </td>
+                {% endif %}
+
                 {% endfor %}
             </tr>
         </tbody>

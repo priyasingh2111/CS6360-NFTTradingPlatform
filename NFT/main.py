@@ -362,27 +362,36 @@ def logout():
 @app.route('/transaction_history')
 def transaction_history():
     user_id = session["user_id"]
-    #get ethereum address for a client
-    ethereum_address_sql = f"SELECT T.ethereum_address FROM Trader T WHERE T.client_id = %s"
+    user_name = session["user_name"]
+
+     #get ethereum address for a client
+    trader_sql = f"SELECT T.ethereum_address FROM  Trader T , User U WHERE T.login = U.login AND U.login = %s AND T.client_id = %s"
 
     #get transactions for ethereum address for buy/sell
-    transactions_sql = f"SELECT * FROM Transaction T where T.ethereum_buyer_address = %s or T.ethereum_seller_address = %s"
+    transactions_sql = f"SELECT Tr.ethereum_nft_address, Tr.commission_type, Tr.commission_paid, Tr.date, Tr.ethereum_value, Tr.cancelled FROM  Trader T , User U, Transaction Tr WHERE T.login = U.login AND U.login = %s AND T.client_id = %s AND T.ethereum_address = Tr.ethereum_seller_address"
     try:
         # fetch ethereum address
-        cursor.execute(ethereum_address_sql, (user_id))
+        cursor.execute(trader_sql, (user_name, user_id))
         trader_ethereum_address_result = cursor.fetchall()
         trader_ethereum_address = trader_ethereum_address_result[0][0]
 
         #fetch transactions
-        cursor.execute(transactions_sql, (trader_ethereum_address, trader_ethereum_address))
+        cursor.execute(transactions_sql, (user_name, user_id))
         transactions_result = cursor.fetchall()
-
+        print(transactions_result)
         return render_template('transaction_history.html', transaction_details=transactions_result)
 
     except con.Error as err:
         # query error
+        print("TTT-2")
         print(err.msg)
     return render_template('transaction_history.html')
+
+
+@app.route('/cancel_transaction')
+def cancel_transaction():
+    #todo
+    return redirect(url_for("home"))
 
 if __name__ == '__main__':
     app.run(debug=True)
