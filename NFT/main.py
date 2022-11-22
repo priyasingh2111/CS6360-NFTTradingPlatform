@@ -391,6 +391,7 @@ def transaction_history():
 @app.route('/cancel_transaction')
 def cancel_transaction():
     #todo
+    
     return redirect(url_for("home"))
 
 if __name__ == '__main__':
