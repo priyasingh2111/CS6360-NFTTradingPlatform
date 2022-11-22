@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, session, flash
+from flask import Flask, request, render_template, redirect, url_for, session, flash, jsonify
 import mysql.connector as con
 from connector import cursor, db
 import random
@@ -103,7 +103,8 @@ def signup():
         zip_code = request.form['zip_code']
 
         # generate random eth_address & client_id
-        lst = [random.choice(string.ascii_letters + string.digits) for _ in range(42)]
+        lst = [random.choice(string.ascii_letters + string.digits)
+                             for _ in range(42)]
         eth_address = "".join(lst)
         client_id = random.randrange(10000, 99999)
 
@@ -202,7 +203,8 @@ def edit_user_info():
         cell_phone_number = request.form['cell_phone_number']
         email = request.form['email']
 
-        dic = {0: first_name, 1: last_name, 2: phone_number, 3: cell_phone_number, 4: email}
+        dic = {0: first_name, 1: last_name,
+            2: phone_number, 3: cell_phone_number, 4: email}
 
         trader_sql = f"SELECT first_name, last_name, phone_no, cell_no, email FROM Trader WHERE client_id = %s"
         update_sql = f"UPDATE Trader SET first_name = %s, last_name = %s, phone_no = %s, cell_no = %s, email = %s " \
@@ -218,7 +220,8 @@ def edit_user_info():
                     dic[i] = trader_result[0][i]
 
             # update trader
-            cursor.execute(update_sql, (dic[0], dic[1], dic[2], dic[3], dic[4], user_id))
+            cursor.execute(
+                update_sql, (dic[0], dic[1], dic[2], dic[3], dic[4], user_id))
             db.commit()
 
             return redirect(url_for("profile"))
@@ -279,7 +282,7 @@ def edit_login():
                 cursor.execute(Trader_update, (dic[0], user_id))
                 db.commit()
 
-                #delete old login
+                # delete old login
                 cursor.execute(login_delete, (result[0][0],))
                 db.commit()
 
@@ -322,7 +325,8 @@ def edit_address():
 
                 # update current address's city & state
                 if result[0][1] != city or result[0][2] != state:
-                    cursor.execute(update_address_sql, (city, state, street, zip_code))
+                    cursor.execute(update_address_sql,
+                                   (city, state, street, zip_code))
                     db.commit()
 
                 # update user
@@ -333,7 +337,8 @@ def edit_address():
             # moved to new address
             else:
                 # insert new address
-                cursor.execute(insert_new_address, (street, city, state, zip_code))
+                cursor.execute(insert_new_address,
+                               (street, city, state, zip_code))
                 db.commit()
 
                 # update user
@@ -358,16 +363,18 @@ def logout():
     session.pop("user_id", None)
     return redirect(url_for("index"))
 
-#transaction_history
+# transaction_history
+
+
 @app.route('/transaction_history')
 def transaction_history():
     user_id = session["user_id"]
     user_name = session["user_name"]
 
-     #get ethereum address for a client
+     # get ethereum address for a client
     trader_sql = f"SELECT T.ethereum_address FROM  Trader T , User U WHERE T.login = U.login AND U.login = %s AND T.client_id = %s"
 
-    #get transactions for ethereum address for buy/sell
+    # get transactions for ethereum address for buy/sell
     transactions_sql = f"SELECT Tr.ethereum_nft_address, Tr.commission_type, Tr.commission_paid, Tr.date, Tr.ethereum_value, Tr.cancelled FROM  Trader T , User U, Transaction Tr WHERE T.login = U.login AND U.login = %s AND T.client_id = %s AND T.ethereum_address = Tr.ethereum_seller_address"
     try:
         # fetch ethereum address
@@ -375,7 +382,7 @@ def transaction_history():
         trader_ethereum_address_result = cursor.fetchall()
         trader_ethereum_address = trader_ethereum_address_result[0][0]
 
-        #fetch transactions
+        # fetch transactions
         cursor.execute(transactions_sql, (user_name, user_id))
         transactions_result = cursor.fetchall()
         print(transactions_result)
@@ -383,16 +390,57 @@ def transaction_history():
 
     except con.Error as err:
         # query error
-        print("TTT-2")
         print(err.msg)
     return render_template('transaction_history.html')
 
 
 @app.route('/cancel_transaction')
 def cancel_transaction():
-    #todo
-    
+    # todo
+
     return redirect(url_for("home"))
+
+
+@app.route('/manager_dashboard')
+def manager_dashboard():
+    
+    # fetch aggregate transaction results
+    transactions_sql = f"SELECT SUM(Tr.commission_paid) , COUNT(*) FROM Transaction Tr"
+    try:
+        cursor.execute(transactions_sql)
+        transactions_sql_result = cursor.fetchall()
+        return render_template('manager_dashboard.html', transactions=transactions_sql_result)
+
+    except con.Error as err:
+        # query error
+        print(err.msg)
+        return render_template('manager_dashboard.html')
+
+@app.route("/daterange_transaction_history",methods=['POST','GET'])
+def daterange_transaction_history(): 
+
+    if request.method == "POST":
+
+        #get date range
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        print(start_date)
+        print(end_date)
+
+        daterange_sql = f"SELECT SUM(Tr.commission_paid) , COUNT(*) FROM Transaction Tr"
+
+        try:
+            cursor.execute(daterange_sql)
+            daterange_sql_result = cursor.fetchall()
+            print(daterange_sql_result[0][0])
+            return jsonify({'htmlresponse': render_template('daterange_transactions.html', transactions = daterange_sql_result)})
+
+        except con.Error as err:
+            # query error
+            print("TTT- error ")
+            print(err.msg)
+        
+        return jsonify({'htmlresponse': render_template('daterange_transactions.html')})
 
 if __name__ == '__main__':
     app.run(debug=True)
