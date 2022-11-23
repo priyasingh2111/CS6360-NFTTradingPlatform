@@ -40,6 +40,63 @@
                 {% endfor %}
             </table>
         </div>
+
+        
+        <h4 align="center">Daily Transactions</h4>
+        <br>
+
+        <div id="daily_transaction_history">
+            <table class="table table-bordered">
+                <tr>
+                    <th width="45%">Total Commission Paid</th>
+                    <th width="35%">Total Transactions</th>
+                </tr>
+                {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction[0] }}</td>
+                    <td>{{ transaction[1] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <h4 align="center">Weekly Transactions</h4>
+        <br>
+        <div id="weekly_transaction_history">
+            <table class="table table-bordered">
+                <tr>
+                    <th width="45%">Total Commission Paid</th>
+                    <th width="35%">Total Transactions</th>
+                </tr>
+                {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction[0] }}</td>
+                    <td>{{ transaction[1] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <br>
+        
+        <h4 align="center">Monthly Transactions</h4>
+        <br>
+        <br>
+        <div id="monthly_transaction_history">
+            <table class="table table-bordered">
+                <tr>
+                    <th width="45%">Total Commission Paid</th>
+                    <th width="35%">Total Transactions</th>
+                </tr>
+                {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction[0] }}</td>
+                    <td>{{ transaction[1] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.js"></script>
