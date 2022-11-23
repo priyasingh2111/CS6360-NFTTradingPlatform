@@ -51,7 +51,7 @@
                     <th width="45%">Total Commission Paid</th>
                     <th width="35%">Total Transactions</th>
                 </tr>
-                {% for transaction in transactions %}
+                {% for transaction in transactions_daily %}
                 <tr>
                     <td>{{ transaction[0] }}</td>
                     <td>{{ transaction[1] }}</td>
@@ -68,7 +68,7 @@
                     <th width="45%">Total Commission Paid</th>
                     <th width="35%">Total Transactions</th>
                 </tr>
-                {% for transaction in transactions %}
+                {% for transaction in transactions_weekly %}
                 <tr>
                     <td>{{ transaction[0] }}</td>
                     <td>{{ transaction[1] }}</td>
@@ -88,7 +88,7 @@
                     <th width="45%">Total Commission Paid</th>
                     <th width="35%">Total Transactions</th>
                 </tr>
-                {% for transaction in transactions %}
+                {% for transaction in transactions_monthly %}
                 <tr>
                     <td>{{ transaction[0] }}</td>
                     <td>{{ transaction[1] }}</td>
@@ -100,7 +100,6 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.js"></script>
-    <!-- Script -->
     <script>
         $(document).ready(function () {
             $.datepicker.setDefaults({

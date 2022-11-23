@@ -3,6 +3,7 @@ import mysql.connector as con
 from connector import cursor, db
 import random
 import string
+from datetime import date
 
 app = Flask(__name__)
 app.secret_key = "key"
@@ -403,13 +404,38 @@ def cancel_transaction():
 
 @app.route('/manager_dashboard')
 def manager_dashboard():
+
+    date_today = str(date.today())
+    month_today = date.today().month
     
     # fetch aggregate transaction results
-    transactions_sql = f"SELECT SUM(Tr.commission_paid) , COUNT(*) FROM Transaction Tr"
+    transactions_sql = f"SELECT SUM(Tr.commission_paid) , COUNT(*) FROM Transaction Tr "
+    transactions_sql_daily = f"SELECT SUM(Tr.commission_paid) , COUNT(*) FROM Transaction Tr WHERE Tr.date = %s "
+    transactions_sql_weekly = f"SELECT SUM(Tr.commission_paid) , COUNT(*) FROM Transaction Tr WHERE WEEK(Tr.date) = WEEK(NOW())"
+    transactions_sql_monthly = f"SELECT SUM(Tr.commission_paid) , COUNT(*) FROM Transaction Tr WHERE MONTH(Tr.date) = %s"
     try:
+
+        #alltime transactions
         cursor.execute(transactions_sql)
         transactions_sql_result = cursor.fetchall()
-        return render_template('manager_dashboard.html', transactions=transactions_sql_result)
+
+        #daily transactions
+        cursor.execute(transactions_sql_daily,(date_today,))
+        transactions_sql_daily_result = cursor.fetchall()
+
+        #weekly transactions
+        cursor.execute(transactions_sql_weekly)
+        transactions_sql_weekly_result = cursor.fetchall()
+
+        #monthly transactions
+        cursor.execute(transactions_sql_monthly,(month_today,))
+        transactions_sql_monthly_result = cursor.fetchall()
+
+        return render_template('manager_dashboard.html', 
+        transactions = transactions_sql_result, 
+        transactions_daily = transactions_sql_daily_result,
+        transactions_weekly = transactions_sql_weekly_result,
+        transactions_monthly = transactions_sql_monthly_result)
 
     except con.Error as err:
         # query error
@@ -427,10 +453,10 @@ def daterange_transaction_history():
         print(start_date)
         print(end_date)
 
-        daterange_sql = f"SELECT SUM(Tr.commission_paid) , COUNT(*) FROM Transaction Tr"
+        daterange_sql = f"SELECT SUM(Tr.commission_paid) , COUNT(*) FROM Transaction Tr WHERE Tr.date BETWEEN %s AND %s"
 
         try:
-            cursor.execute(daterange_sql)
+            cursor.execute(daterange_sql, (start_date, end_date))
             daterange_sql_result = cursor.fetchall()
             print(daterange_sql_result[0][0])
             return jsonify({'htmlresponse': render_template('daterange_transactions.html', transactions = daterange_sql_result)})
