@@ -427,6 +427,7 @@ def daterange_transaction_history():
         print(start_date)
         print(end_date)
 
+
         daterange_sql = f"SELECT SUM(Tr.commission_paid) , COUNT(*) FROM Transaction Tr"
 
         try:

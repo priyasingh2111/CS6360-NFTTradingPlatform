@@ -29,15 +29,13 @@
         <div id="daterange_transaction_history">
             <table class="table table-bordered">
                 <tr>
-                    <th width="5%">Date</th>
+                    <th width="45%">Total Commission Paid</th>
                     <th width="35%">Total Transactions</th>
-                    <th width="40%">Total Commission Paid</th>
                 </tr>
                 {% for transaction in transactions %}
                 <tr>
                     <td>{{ transaction[0] }}</td>
                     <td>{{ transaction[1] }}</td>
-                    <td>{{ transaction[2] }}</td>
                 </tr>
                 {% endfor %}
             </table>
@@ -49,7 +47,7 @@
     <script>
         $(document).ready(function () {
             $.datepicker.setDefaults({
-                dateFormat: 'yyyy-mm-dd'
+                dateFormat: 'yy-mm-dd'
             });
             $(function () {
                 $("#start_date").datepicker();
@@ -58,19 +56,24 @@
             $('#range').click(function () {
                 var start_date = $('#start_date').val();
                 var end_date = $('#end_date').val();
+
                 if (start_date != '' && end_date != '') {
-                    $.ajax({
+                    if(start_date <= end_date) {
+                        $.ajax({
                         url: "/daterange_transaction_history",
-                        method: "POST",
+                        method: 'POST',
                         data: { start_date: start_date, end_date: end_date },
                         success: function (data) {
                             $('#daterange_transaction_history').html(data);
                             $('#daterange_transaction_history').append(data.htmlresponse);
                         }
                     });
+                    } else {
+                        alert("Please select the correct date");
+                    }
                 }
                 else {
-                    alert("Please Select the Date");
+                    alert("Please select the date");
                 }
             });
         });

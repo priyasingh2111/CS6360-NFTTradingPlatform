@@ -1,16 +1,12 @@
-
-<p>Hello</p>
 <table class="table table-bordered">
     <tr>
-        <th width="5%">Date</th>
+        <th width="45%">Total Commission Paid</th>
         <th width="35%">Total Transactions</th>
-        <th width="40%">Total Commission Paid</th>
     </tr>
     {% for transaction in transactions %}
     <tr>
         <td>{{ transaction[0] }}</td>
         <td>{{ transaction[1] }}</td>
-        <td>{{ transaction[2] }}</td>
     </tr>
     {% endfor %}
 </table>
