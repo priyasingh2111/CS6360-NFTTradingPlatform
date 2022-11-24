@@ -418,18 +418,22 @@ def manager_dashboard():
         #alltime transactions
         cursor.execute(transactions_sql)
         transactions_sql_result = cursor.fetchall()
+        print(transactions_sql_result)
 
         #daily transactions
         cursor.execute(transactions_sql_daily,(date_today,))
         transactions_sql_daily_result = cursor.fetchall()
+        print(transactions_sql_daily_result)
 
         #weekly transactions
         cursor.execute(transactions_sql_weekly)
         transactions_sql_weekly_result = cursor.fetchall()
+        print(transactions_sql_weekly_result)
 
         #monthly transactions
         cursor.execute(transactions_sql_monthly,(month_today,))
         transactions_sql_monthly_result = cursor.fetchall()
+        print(transactions_sql_monthly_result)
 
         return render_template('manager_dashboard.html', 
         transactions = transactions_sql_result, 
