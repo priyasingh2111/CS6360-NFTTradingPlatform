@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style media="screen">
+      *,
+*:before,
+*:after{
+    padding: 0;
+    box-sizing: border-box;
+}
+body{
+    background-color: #5c1dbc;
+}
+.pop-up{
+    background-color: #ffffff;
+    position: absolute;
+    transform: translate(-50%,-50%);
+    left:50%;
+    top: 40%;
+    border-radius: 9px;
+    font-family: Verdana;
+    display: none; 
+    text-align: center;
+    width: 400px;
+    padding: 40px 40px;
+}
+.pop-up button{
+    display: block;
+    margin:  0 0 10px auto;
+    background: #5c1dbc;
+    font-size: 30px;
+    color: #ffffff;
+    border-radius: 100%;
+    width: 30px;
+    height: 30px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+}
+.pop-up h2{
+  margin-top: -20px;
+}
+.pop-up p{
+    font-size: 14px;
+    text-align: justify;
+    margin: 20px 0;
+    line-height: 25px;
+}
+a{
+    display: block;
+    width: 130px;
+    position: relative;
+    margin: 10px auto;
+    text-align: center;
+    background-color: #5c1dbc;
+    border-radius: 20px;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 9px 0;
+}
+    </style>
+</head>
+<body>
+    <div class="pop-up">
+        <button id="close">&times;</button>
+        <h2>Confirmed!</h2>
+        <p>
+            You have successfully placed a bid for this item.
+        </p>
+        <a href="#">View Item</a>
+    </div>
+    <script type="text/javascript">
+window.addEventListener("load", function(){
+    setTimeout(
+        function open(event){
+            document.querySelector(".pop-up").style.display = "block";
+        },
+        2000 
+    )
+});
+    document.querySelector("#close").addEventListener("click", function(){
+    document.querySelector(".pop-up").style.display = "none";
+});
+    </script>
+</body>
+</html>
