@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+	  <link rel="stylesheet" href="{{url_for('static', filename='css/profile.css')}}">
+    <title>Bootstrap demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <style>
+	  body
+         {
+            background-image: url({{url_for('static', filename='images/profile.jpg')}});
+	        background-size: cover;
+ 	        background-attachment: fixed;
+         }
+    </style>
+</head>
+
+<title>Transaction History</title>
+
+<body>
+    {% include "navbar.html"%}
+    <br />
+    <h2>Transaction History</h2><br>
+    <br>
+    <br>
+    <main class="container p-5">
+       
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">NFT Address</th>
+                <th scope="col">Commission Type</th>
+                <th scope="col">Commission </th>
+                <th scope="col">TimeStamp</th>
+                <th scope="col">Ethereum Value</th>
+                <th scope="col">Cancellation Status</th>
+                <th scope="col">Cancel Transaction</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transaction_details %}
+            <tr>
+                <td>{{ transaction[0]}}</td>
+                <td>{{ transaction[1]}}</td>
+                <td>{{ transaction[2]}}</td>
+                <td>{{ transaction[3]}}</td>
+                <td>{{ transaction[4]}}</td>
+
+                {% set isCancelled = transaction[5] %}
+                {% set notCancelledTxt = "Not Cancelled" %}
+                {% set cancelledTxt = "Cancelled" %}
+
+                {% if isCancelled == 1 %}
+                    <td>{{ cancelledTxt }}</td>
+                {% else %}
+                    <td> {{ notCancelledTxt }} </td>
+                {% endif %}
+
+                {% if isCancelled == 1 %}
+                    <td>{{ cancelledTxt }}</td>
+                {% else %}
+                    <td> <a href="{{url_for('cancel_transaction',tr_id = transaction[6])}}">Cancel Transaction</a> </td>
+                {% endif %}
+
+                {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+
+    </main>
+
+    <br>
+    <br>
+    <br>
+    <br>
+</body>
+
+</html>
