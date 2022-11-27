@@ -376,7 +376,7 @@ def transaction_history():
     trader_sql = f"SELECT T.ethereum_address FROM  Trader T , User U WHERE T.login = U.login AND U.login = %s AND T.client_id = %s"
 
     # get transactions for ethereum address for buy/sell
-    transactions_sql = f"SELECT Tr.ethereum_nft_address, Tr.commission_type, Tr.commission_paid, Tr.date, Tr.ethereum_value, Tr.cancelled FROM  Trader T , User U, Transaction Tr WHERE T.login = U.login AND U.login = %s AND T.client_id = %s AND T.ethereum_address = Tr.ethereum_seller_address"
+    transactions_sql = f"SELECT Tr.ethereum_nft_address, Tr.commission_type, Tr.commission_paid, Tr.date, Tr.ethereum_value, Tr.cancelled, Tr.transaction_id FROM  Trader T , User U, Transaction Tr WHERE T.login = U.login AND U.login = %s AND T.client_id = %s AND T.ethereum_address = Tr.ethereum_seller_address"
     try:
         # fetch ethereum address
         cursor.execute(trader_sql, (user_name, user_id))
@@ -395,9 +395,21 @@ def transaction_history():
     return render_template('transaction_history.html')
 
 
-@app.route('/cancel_transaction')
-def cancel_transaction():
-    # todo
+@app.route('/cancel_transaction/<tr_id>')
+def cancel_transaction(tr_id):
+    #cancel transaction by id
+    cancel_transaction_sql = f"UPDATE  Transaction Tr SET Tr.cancelled = 1 WHERE Tr.transaction_id = %s"
+    print(tr_id)
+    #todo-update timestamp also + check for 15 min logic (here and in html page)
+    try:
+        # update query
+        cursor.execute(cancel_transaction_sql, (tr_id,))
+        db.commit()
+        return redirect(url_for("home"))
+
+    except con.Error as err:
+        # query error
+        print(err.msg)
 
     return redirect(url_for("home"))
 
