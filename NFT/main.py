@@ -472,5 +472,35 @@ def daterange_transaction_history():
         
         return jsonify({'htmlresponse': render_template('daterange_transactions.html')})
 
+
+# home page
+@app.route('/buy', methods=['GET', 'POST'])
+def buy():
+    if "user_id" in session:
+        user_id = session["user_id"]
+
+        #remove hardcoding
+        token_id = 12
+        nft_sql = f"SELECT * FROM  NFT N WHERE N.token_id = %s"
+        seller_info_sql = f"SELECT T.first_name FROM  Trader T, NFT N WHERE T.ethereum_address = N.ethereum_address AND N.token_id = %s"
+    try:
+        # fetch nft
+        cursor.execute(nft_sql, (token_id,))
+        nft_sql_result = cursor.fetchall()
+        print(nft_sql_result)
+
+        #fetch seller info
+        cursor.execute(seller_info_sql, (token_id,))
+        seller_info_sql_result = cursor.fetchall()
+        print(seller_info_sql_result)
+
+        return render_template('buy.html', nft_data=nft_sql_result, seller_data = seller_info_sql_result)
+
+    except con.Error as err:
+        # query error
+        print(err.msg)
+    return render_template('home.html')
+
+
 if __name__ == '__main__':
     app.run(debug=True)
