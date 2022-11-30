@@ -353,7 +353,142 @@ def edit_address():
             return render_template('edit_address.html')
     else:
         return render_template('edit_address.html')
+    
+    
+@app.route('/payment', methods=['GET', 'POST'])
+def payment():
+    if request.method == "POST":
 
+        payment_id = random.randrange(100000, 999999)
+        user_id = session["user_id"]
+        payment_type = request.form['payment_type'].upper()
+        payment_address = request.form['payment_address'].upper()
+        amount = request.form['amount']
+        date = datetime.datetime.now()
+
+        if payment_type == "ETH":
+            payment_type = "E"
+        elif payment_type == "FIAT":
+            payment_type = "F"
+        else:
+            flash("No such payment", "error")
+            return render_template('payment.html')
+
+        insert_new_address = f"INSERT INTO Payment(payment_id, client_id, payment_type, payment_address, " \
+                             f"amount_paid, cancelled, date) VALUES (%s,%s,%s,%s,%s,%s,%s) "
+
+        search_user_sql1 = f"SELECT fiat_balance, ethereum_balance FROM Trader Where client_id = %s "
+
+        update_user_sql1 = f"UPDATE Trader SET fiat_balance = %s WHERE client_id = %s"
+        update_user_sql2 = f"UPDATE Trader SET ethereum_balance = %s WHERE client_id = %s"
+
+        try:
+
+            cursor.execute(insert_new_address,
+                           (payment_id, user_id, payment_type, payment_address, amount, False, date))
+            db.commit()
+
+            cursor.execute(search_user_sql1, (user_id,))
+            result = cursor.fetchall()
+
+            if payment_type == "F":
+                balance = result[0][0]
+                total = balance + float(amount)
+                cursor.execute(update_user_sql1, (total, user_id))
+                db.commit()
+            else:
+                balance = result[0][1]
+                total = balance + float(amount)
+                cursor.execute(update_user_sql2, (total, user_id))
+                db.commit()
+
+            return redirect(url_for("profile"))
+
+        except con.Error as err:
+            print(err)
+            return render_template('payment.html')
+
+    return render_template('payment.html')
+
+
+@app.route('/payment_history')
+def payment_history():
+    user_id = session["user_id"]
+    # query
+    payment_sql = f"SELECT * FROM Payment WHERE client_id = %s ORDER BY date DESC"
+    try:
+        # fetch user info
+        cursor.execute(payment_sql, (user_id,))
+        payment_result = cursor.fetchall()
+
+        return render_template('payment_history.html', payment_detail=payment_result)
+
+    except con.Error as err:
+        # query error
+        print(err.msg)
+
+    return render_template('payment_history.html')
+
+
+@app.route('/cancel_payment')
+def cancel_payment():
+    payment_id = request.args.to_dict()["payment_id"]
+    print(payment_id)
+    user_id = session["user_id"]
+
+    update_payment = f"UPDATE Payment SET cancelled = %s WHERE payment_id = %s"
+    search_payment = f"SELECT payment_type, amount_paid FROM Payment WHERE payment_id = %s "
+    search_payment_date = f"SELECT date FROM Payment WHERE payment_id = %s"
+
+    search_user = f"SELECT fiat_balance, ethereum_balance FROM Trader Where client_id = %s "
+
+    update_user_sql1 = f"UPDATE Trader SET fiat_balance = %s WHERE client_id = %s"
+    update_user_sql2 = f"UPDATE Trader SET ethereum_balance = %s WHERE client_id = %s"
+
+    try:
+        # check if the payment exceeded 15 minutes
+        cursor.execute(search_payment_date, (payment_id,))
+        payment_date = cursor.fetchall()
+
+        current_date = datetime.datetime.now()
+        diff = current_date - payment_date[0][0]
+        minutes = divmod(diff.seconds, 60)
+
+        if minutes[0] >= 15:
+            flash(f"You may only cancel the payment that is placed within 15 minutes", "info")
+            return redirect(url_for("payment_history"))
+
+        # update payment status
+        cursor.execute(update_payment, (True, payment_id))
+        db.commit()
+
+        # fetch payment type
+        cursor.execute(search_payment, (payment_id,))
+        payment_result = cursor.fetchall()
+
+        # fetch user balance
+        cursor.execute(search_user, (user_id,))
+        trader_result = cursor.fetchall()
+
+        payment_type = payment_result[0][0]
+
+        if payment_type == "F":
+
+            total = trader_result[0][0] - payment_result[0][1]
+            cursor.execute(update_user_sql1, (total, user_id))
+            db.commit()
+
+        else:
+            total = trader_result[0][1] - payment_result[0][1]
+            cursor.execute(update_user_sql2, (total, user_id))
+            db.commit()
+
+
+        return redirect(url_for("profile"))
+
+    except con.Error as err:
+        print(err)
+        return redirect(url_for("profile"))
 
 # logout
 @app.route("/logout")
