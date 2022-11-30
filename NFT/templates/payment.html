@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+  <link rel="stylesheet" href="{{url_for('static', filename='css/edit.css')}}">
+    <title>Payment</title>
+  <style>
+	  body
+         {
+            background-image: url({{url_for('static', filename='images/profile.jpg')}});
+	        background-size: cover;
+ 	        background-attachment: fixed;
+         }
+    </style>
+</head>
+<body>
+  <h2>Payment Page</h2>
+	<form action = "/payment" method = "post">
+	<div class = "change">
+	<table>
+	          <tr>
+	          <td>Payment Type:</td>
+	          <td><input type = "text" name = "payment_type" placeholder = "Fiat or ETH" ></td>
+	          <td></td>
+	          </tr>
+		      <tr>
+	          <td>Payment Address:</td>
+	          <td><input type=text name = "payment_address" placeholder = "Bank Account/ETH Address" ></td>
+	          <td></td>
+	          </tr>
+
+	          <tr>
+	          <td>Amount:</td>
+	          <td><input type=number step=any name = "amount" placeholder = " Payment Amount" ></td>
+	          <td></td>
+	          </tr>
+				{% with messages = get_flashed_messages() %}
+					{% if messages %}
+						{% for msg in messages %}
+							<h1>{{msg}}</h1>
+						{% endfor %}
+					{% endif %}
+				{% endwith %}
+
+	 </table>
+	 </div>
+	 <br>
+	 <div class = "edit">
+		<input type = "submit"  name = "submit">
+	</div>
+	</form>
+	<br>
+    <br>
+</body>
+</html>

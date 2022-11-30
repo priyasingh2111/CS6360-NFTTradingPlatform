@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+  <link rel="stylesheet" href="{{url_for('static', filename='css/profile.css')}}">
+    <title>Payment History</title>
+  <style>
+	  body
+         {
+            background-image: url({{url_for('static', filename='images/profile.jpg')}});
+	        background-size: cover;
+ 	        background-attachment: fixed;
+         }
+    </style>
+</head>
+<body>
+  <h2>Payment History</h2>
+  <form action = "/payment_history" method = "post">
+	<table>
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for msg in messages %}
+                <h1>{{msg}}</h1>
+            {% endfor %}
+        {% endif %}
+      {% endwith %}
+      <thead>
+        <tr>
+          <th scope="col">Payment ID</th>
+          <th scope="col">Payment Type</th>
+          <th scope="col">Payment Address</th>
+          <th scope="col">Payment Amount</th>
+          <th scope="col">Payment Date</th>
+          <th scope="col">Payment Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for payment in payment_detail%}
+        <tr>
+          <td>{{payment[0]}}</td>
+          <td>{{payment[2]}}</td>
+          <td>{{payment[3]}}</td>
+          <td>{{payment[4]}}</td>
+          <td>{{payment[6]}}</td>
+          {% if payment[5] == 0 %}
+          <td><a href="{{url_for('cancel_payment')}}?payment_id={{payment[0]}}">Cancel</a></td>
+          {% else %}
+          <td>Canceled</td>
+          {% endif %}
+        </tr>
+        {%endfor%}
+      </tbody>
+	 </table>
+	 <br>
+    </form>
+	<br>
+    <br>
+</body>
+</html>
