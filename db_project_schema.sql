@@ -74,7 +74,7 @@ create table Transaction(
     ethereum_nft_address varchar(255),
     commission_type double,
     commission_paid double,
-    date date,
+    date DATETIME,
     primary key(transaction_id),
     foreign key(ethereum_buyer_address) references Trader(ethereum_address),
     foreign key(ethereum_seller_address) references Trader(ethereum_address)
