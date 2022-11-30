@@ -50,7 +50,7 @@ create table Payment(
     payment_address varchar(255),
     amount_paid double,
     cancelled boolean,
-    date date,
+    date DATETIME DEFAULT CURRENT_TIMESTAMP,
     primary key(payment_id),
     foreign key(client_id) references Trader(client_id)
     on delete no action
