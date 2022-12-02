@@ -154,9 +154,25 @@ def signup():
 # home page
 @app.route('/home', methods=['GET', 'POST'])
 def home():
+    ## also called available nfts page
     if "user_id" in session:
         user_id = session["user_id"]
-        return render_template('home.html', content=user_id)
+        #print(user_id)
+        get_curr_ethereum_address = f"select ethereum_address from temp.Trader T where T.client_id = %s"
+        avail_nft_sql = f"select N.* from temp.NFT N where N.ethereum_address != %s"
+        try:
+            # fetch user info
+            cursor.execute(get_curr_ethereum_address, (user_id,))
+            trader_ethereum_address = cursor.fetchall()
+            #print(trader_ethereum_address)
+            cursor.execute(avail_nft_sql, (trader_ethereum_address[0]))
+            avail_nft_sql_result = cursor.fetchall()
+            #print(avail_nft_sql_result)
+
+        except con.Error as err:
+        # query error
+            print(err.msg)
+        return render_template('home.html', content=user_id, avail_nft_sql=avail_nft_sql_result)
     else:
         return redirect(url_for("index"))
 
