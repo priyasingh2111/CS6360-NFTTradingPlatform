@@ -3,43 +3,19 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-	  <link rel="stylesheet" href="{{url_for('static', filename='css/owned_nfts.css')}}">
+	  <link rel="stylesheet" href="{{url_for('static', filename='css/error-404.css')}}">
     <title>NFT Trading Platform</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
-    <style>
-	  body
-         {
-            background-image: url({{url_for('static', filename='images/profile.jpg')}});
-	        background-size: cover;
- 	        background-attachment: fixed;
-         }
-    </style>
   </head>
   <body>
     {% include "navbar.html"%}
-    <br/>
-	<h2>Owned NFTs</h2><br>
-	<table class="table">
-		<tbody>
-			{% for own in owned_nfts%}
-			<thead class="thead-light">
-    <tr>
-      <th scope="col">Token ID:</th>
-      <th scope="col">Name</th>
-      <th scope="col">Market Value</th>
-    </tr>
-    <tr>
-      <td>{{own[0]}}</td>
-      <td>{{own[1]}}</td>
-      <td>{{own[2]}}</td>
-    </tr>
-			{% endfor %}
-		</tbody>
-	</table>
-
+  </div>
 	<br>
 	<br>
 	<br>
+      <h2>
+          Not Found!
+      </h2>
 	<br>
 	<br>
 	<br>

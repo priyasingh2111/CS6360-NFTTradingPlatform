@@ -507,15 +507,20 @@ def owned_nfts():
     user_name = session["user_name"]
 
     # query
-    owned_nft_sql = f"SELECT * FROM  NFT N , Trader T, User U WHERE T.login = U.login AND U.login = %s AND T.client_id = %s AND N.owner_id = T.client_id"
+    owned_nft_sql = f"SELECT token_id, name, market_value FROM  NFT N , Trader T WHERE T.client_id = %s AND N.ethereum_address = T.ethereum_address"
     
     try:
         # fetch user info
-        cursor.execute(owned_nft_sql, (user_name, user_id))
+        cursor.execute(owned_nft_sql, (user_id,))
         owned_nft_result = cursor.fetchall()
-
+        print(owned_nft_result)
+    
+    except con.Error as err:
+        # query error
+        print(err.msg)
+        return render_template('Error-404.html')
         # fetch address info
-        return render_template('owned_nfts.html', owned_nfts=owned_nft_result)
+    return render_template('owned_nfts.html', owned_nfts=owned_nft_result)
 
 # transaction_history
 
@@ -539,7 +544,7 @@ def transaction_history():
         # fetch transactions
         cursor.execute(transactions_sql, (user_name, user_id))
         transactions_result = cursor.fetchall()
-        print(transactions_result)
+        #print(transactions_result)
         return render_template('transaction_history.html', transaction_details=transactions_result)
 
     except con.Error as err:
@@ -552,7 +557,7 @@ def transaction_history():
 def cancel_transaction(tr_id):
     #cancel transaction by id
     cancel_transaction_sql = f"UPDATE  Transaction Tr SET Tr.cancelled = 1 WHERE Tr.transaction_id = %s"
-    print(tr_id)
+    #print(tr_id)
     #todo-update timestamp also + check for 15 min logic (here and in html page)
     try:
         # update query
@@ -583,22 +588,22 @@ def manager_dashboard():
         #alltime transactions
         cursor.execute(transactions_sql)
         transactions_sql_result = cursor.fetchall()
-        print(transactions_sql_result)
+        #print(transactions_sql_result)
 
         #daily transactions
         cursor.execute(transactions_sql_daily,(date_today,))
         transactions_sql_daily_result = cursor.fetchall()
-        print(transactions_sql_daily_result)
+        #print(transactions_sql_daily_result)
 
         #weekly transactions
         cursor.execute(transactions_sql_weekly)
         transactions_sql_weekly_result = cursor.fetchall()
-        print(transactions_sql_weekly_result)
+        #print(transactions_sql_weekly_result)
 
         #monthly transactions
         cursor.execute(transactions_sql_monthly,(month_today,))
         transactions_sql_monthly_result = cursor.fetchall()
-        print(transactions_sql_monthly_result)
+        #print(transactions_sql_monthly_result)
 
         return render_template('manager_dashboard.html', 
         transactions = transactions_sql_result, 
@@ -623,9 +628,12 @@ def checkout():
         # fetch user info
         cursor.execute(trader_sql, (user_name, user_id))
         checkout_result = cursor.fetchall()
-
+    
+    except con.Error as err:
+        # query error
+        print(err.msg)
         # fetch address info
-        return render_template('checkout.html', checkout_result=checkout_result)
+    return render_template('checkout.html', checkout_result=checkout_result)
 
         
 
