@@ -386,14 +386,13 @@ def checkout():
 
     # query
     trader_sql = f"SELECT fiat_balance ,ethereum_balance FROM  Trader T , User U WHERE T.login = U.login AND U.login = %s AND T.client_id = %s"
-    
     try:
         # fetch user info
         cursor.execute(trader_sql, (user_name, user_id))
         checkout_result = cursor.fetchall()
 
         # fetch address info
-        return render_template('checkout.html', owned_nfts=checkout_result)
+        return render_template('checkout.html', checkout_result=checkout_result)
 
     except con.Error as err:
         # query error
