@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title> Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css" />
+</head>
+
+<body>
+    {% include "navbar.html"%}
+    <br />
+    <div class="container">
+        <h2 align="center">Manager Dashboard</h2>
+        <br />
+        <br />
+        <div class="col-md-2">
+            <input type="text" name="start_date" id="start_date" class="form-control" placeholder="From Date" />
+        </div>
+        <div class="col-md-2">
+            <input type="text" name="end_date" id="end_date" class="form-control" placeholder="To Date" />
+        </div>
+        <div class="col-md-8">
+            <input type="button" name="range" id="range" value="Range" class="btn btn-success" />
+        </div>
+        <div class="clearfix"></div>
+        <br />
+        <div id="daterange_transaction_history">
+            <table class="table table-bordered">
+                <tr>
+                    <th width="45%">Total Commission Paid</th>
+                    <th width="35%">Total Transactions</th>
+                </tr>
+                {% for transaction in transactions %}
+                <tr>
+                    <td>{{ transaction[0] }}</td>
+                    <td>{{ transaction[1] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        
+        <h4 align="center">Daily Transactions</h4>
+        <br>
+
+        <div id="daily_transaction_history">
+            <table class="table table-bordered">
+                <tr>
+                    <th width="45%">Total Commission Paid</th>
+                    <th width="35%">Total Transactions</th>
+                </tr>
+                {% for transaction in transactions_daily %}
+                <tr>
+                    <td>{{ transaction[0] }}</td>
+                    <td>{{ transaction[1] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <h4 align="center">Weekly Transactions</h4>
+        <br>
+        <div id="weekly_transaction_history">
+            <table class="table table-bordered">
+                <tr>
+                    <th width="45%">Total Commission Paid</th>
+                    <th width="35%">Total Transactions</th>
+                </tr>
+                {% for transaction in transactions_weekly %}
+                <tr>
+                    <td>{{ transaction[0] }}</td>
+                    <td>{{ transaction[1] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <br>
+        
+        <h4 align="center">Monthly Transactions</h4>
+        <br>
+        <br>
+        <div id="monthly_transaction_history">
+            <table class="table table-bordered">
+                <tr>
+                    <th width="45%">Total Commission Paid</th>
+                    <th width="35%">Total Transactions</th>
+                </tr>
+                {% for transaction in transactions_monthly %}
+                <tr>
+                    <td>{{ transaction[0] }}</td>
+                    <td>{{ transaction[1] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.js"></script>
+    <script>
+        $(document).ready(function () {
+            $.datepicker.setDefaults({
+                dateFormat: 'yy-mm-dd'
+            });
+            $(function () {
+                $("#start_date").datepicker();
+                $("#end_date").datepicker();
+            });
+            $('#range').click(function () {
+                var start_date = $('#start_date').val();
+                var end_date = $('#end_date').val();
+
+                if (start_date != '' && end_date != '') {
+                    if(start_date <= end_date) {
+                        $.ajax({
+                        url: "/daterange_transaction_history",
+                        method: 'POST',
+                        data: { start_date: start_date, end_date: end_date },
+                        success: function (data) {
+                            $('#daterange_transaction_history').html(data);
+                            $('#daterange_transaction_history').append(data.htmlresponse);
+                        }
+                    });
+                    } else {
+                        alert("Please select the correct date");
+                    }
+                }
+                else {
+                    alert("Please select the date");
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
