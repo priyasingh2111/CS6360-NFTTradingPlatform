@@ -23,7 +23,7 @@ create table Trader(
     street_address varchar(255),
     zip_code varchar(30),
     login varchar(255) UNIQUE,
-    level char(1),
+    level varchar(30),
     fiat_balance double,
     ethereum_balance double,
     primary key(client_id),
