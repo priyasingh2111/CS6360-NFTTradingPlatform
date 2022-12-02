@@ -555,15 +555,29 @@ def transaction_history():
 
 @app.route('/cancel_transaction/<tr_id>')
 def cancel_transaction(tr_id):
-    #cancel transaction by id
+    #cancel transaction by id + 15 min check logic
+    cancel_transaction_time_sql = f"SELECT date FROM Transaction WHERE transaction_id = %s"
     cancel_transaction_sql = f"UPDATE  Transaction Tr SET Tr.cancelled = 1 WHERE Tr.transaction_id = %s"
     #print(tr_id)
     #todo-update timestamp also + check for 15 min logic (here and in html page)
     try:
-        # update query
-        cursor.execute(cancel_transaction_sql, (tr_id,))
-        db.commit()
-        return redirect(url_for("home"))
+        #get date query
+        cursor.execute(cancel_transaction_time_sql, (tr_id,))
+        transaction_date_result = cursor.fetchall()
+
+        current_date = datetime.datetime.now()
+        diff = current_date - transaction_date_result[0][0]
+        minutes = divmod(diff.seconds, 60)
+
+        if minutes[0] >= 15:
+            flash(f"You may only cancel the transaction that is placed within 15 minutes", "info")
+
+        else: 
+            # update query
+            cursor.execute(cancel_transaction_sql, (tr_id,))
+            #todo - after cancelling transaction - what to do?
+            db.commit()
+        return redirect(url_for("transaction_history"))
 
     except con.Error as err:
         # query error

@@ -23,6 +23,16 @@
     <br />
     <h2>Transaction History</h2><br>
     <br>
+    <div class='msgs' align = "center">
+      <h4>
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for msg in messages %}
+                <p>{{msg}}</p>
+            {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </h4>
     <br>
     <main class="container p-5">
        
