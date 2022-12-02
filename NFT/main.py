@@ -500,6 +500,23 @@ def logout():
     session.pop("user_id", None)
     return redirect(url_for("index"))
 
+
+@app.route('/owned_nfts')
+def owned_nfts():
+    user_id = session["user_id"]
+    user_name = session["user_name"]
+
+    # query
+    owned_nft_sql = f"SELECT * FROM  NFT N , Trader T, User U WHERE T.login = U.login AND U.login = %s AND T.client_id = %s AND N.owner_id = T.client_id"
+    
+    try:
+        # fetch user info
+        cursor.execute(owned_nft_sql, (user_name, user_id))
+        owned_nft_result = cursor.fetchall()
+
+        # fetch address info
+        return render_template('owned_nfts.html', owned_nfts=owned_nft_result)
+
 # transaction_history
 
 
@@ -592,7 +609,25 @@ def manager_dashboard():
     except con.Error as err:
         # query error
         print(err.msg)
-        return render_template('manager_dashboard.html')
+
+    return render_template('manager_dashboard.html')
+
+@app.route('/checkout')
+def checkout():
+    user_id = session["user_id"]
+    user_name = session["user_name"]
+
+    # query
+    trader_sql = f"SELECT fiat_balance ,ethereum_balance FROM  Trader T , User U WHERE T.login = U.login AND U.login = %s AND T.client_id = %s"
+    try:
+        # fetch user info
+        cursor.execute(trader_sql, (user_name, user_id))
+        checkout_result = cursor.fetchall()
+
+        # fetch address info
+        return render_template('checkout.html', checkout_result=checkout_result)
+
+        
 
 @app.route("/daterange_transaction_history",methods=['POST','GET'])
 def daterange_transaction_history(): 
@@ -647,7 +682,8 @@ def buy():
     except con.Error as err:
         # query error
         print(err.msg)
-    return render_template('home.html')
+
+    return render_template('checkout.html')
 
 
 if __name__ == '__main__':
