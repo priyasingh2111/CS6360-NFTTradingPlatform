@@ -23,7 +23,7 @@ create table Trader(
     street_address varchar(255),
     zip_code varchar(30),
     login varchar(255) UNIQUE,
-    level char(1),
+    level varchar(30),
     fiat_balance double,
     ethereum_balance double,
     primary key(client_id),
@@ -78,3 +78,24 @@ create table Transaction(
     foreign key(ethereum_buyer_address) references Trader(ethereum_address),
     foreign key(ethereum_seller_address) references Trader(ethereum_address)
 );
+
+create table offer(
+    nft_id int,
+    fiat_balance double,
+    ethereum_balance double,
+    buyerid varchar(255),
+    sellerid varchar(255),
+    primary key(nft_id,buyerid,sellerid),
+    foreign key(nft_id) references NFT(token_id),
+    foreign key(buyerid) references Trader(client_id),
+    foreign key(sellerid) references Trader(client_id)
+);
+
+#drop table offer;
+#drop table Transaction;
+#drop table Manager;
+#drop table Payment;
+#drop table NFT;
+#drop table Trader;
+#drop table Address;
+#drop table User; 

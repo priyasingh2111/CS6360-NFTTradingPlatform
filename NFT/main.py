@@ -137,7 +137,7 @@ def signup():
 
             # insert new trader
             cursor.execute(trader_sql, (client_id, eth_address, first_name, last_name, phone_number, cell_phone_number,
-                                        email, street, zip_code, login_name, 'D', 0.0, 0.0))
+                                        email, street, zip_code, login_name, 'SILVER', 0.0, 0.0))
             db.commit()
             return render_template('login.html')
 
