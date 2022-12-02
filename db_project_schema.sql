@@ -36,10 +36,9 @@ create table NFT(
     token_id varchar(255),
     ethereum_address varchar(256),
     name varchar(255),
-    owner_id varchar(255),
     market_value double,
     primary key(token_id),
-    foreign key(owner_id) references Trader(client_id)
+    foreign key(ethereum_address) references Trader(ethereum_address)
     on delete no action
 );
 
