@@ -5,7 +5,7 @@ import random
 import string
 from datetime import date
 import datetime
-
+import requests
 app = Flask(__name__)
 app.secret_key = "key"
 
@@ -653,11 +653,11 @@ def checkout():
     user_name = session["user_name"]
 
     # query
-    trader_sql = f"SELECT fiat_balance ,ethereum_balance FROM  Trader T , User U WHERE T.login = U.login AND U.login = %s AND T.client_id = %s"
+    trader_sql = f"SELECT fiat_balance, ethereum_balance FROM  Trader T WHERE T.client_id = %s"
     try:
         # fetch user info
-        cursor.execute(trader_sql, (user_name, user_id))
-        checkout_result = cursor.fetchall()
+        cursor.execute(trader_sql, (user_id, ))
+        checkout_result = cursor.fetchall() 
     
     except con.Error as err:
         # query error
@@ -701,7 +701,7 @@ def buy():
         user_id = session["user_id"]
 
         #remove hardcoding
-        token_id = 12
+        token_id = 1
         nft_sql = f"SELECT * FROM  NFT N WHERE N.token_id = %s"
         seller_info_sql = f"SELECT T.first_name FROM  Trader T, NFT N WHERE T.ethereum_address = N.ethereum_address AND N.token_id = %s"
     try:
