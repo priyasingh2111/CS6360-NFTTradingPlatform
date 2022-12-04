@@ -3,7 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap demo</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='css/home.css')}}">
+    <title>NFT Trading Platform</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
     <style>
 body
@@ -32,7 +33,7 @@ body
       <td>{{avail_data[0]}}</td>
       <td>{{avail_data[2]}}</td>
       <td>{{avail_data[3]}}</td>   
-      <td><a href=buy class="btn btn-primary">Buy Now</a></td>
+      <td><a href="{{url_for('buy',token_id = avail_data[0])}}" class="btn btn-primary">Buy Now</a></td>
     </tr>
 			{% endfor %}
 		</tbody>
