@@ -1,3 +1,10 @@
+'''
+Michael Zayne Lumpkin, mzl190000
+Siddhi Mahesh Potdar, smp220001
+Desong Li, dxl180019
+Tanya Sharma, txs220004
+Priya Singh, pxs220067
+'''
 from flask import Flask, request, render_template, redirect, url_for, session, flash, jsonify
 import mysql.connector as con
 from connector import cursor, db
