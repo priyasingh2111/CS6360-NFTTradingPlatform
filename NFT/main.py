@@ -654,17 +654,21 @@ def manager_dashboard():
 
     return render_template('manager_dashboard.html')
 
-@app.route('/checkout')
-def checkout():
+@app.route('/checkout/<quoted_amount>')
+def checkout(quoted_amount):
     user_id = session["user_id"]
     user_name = session["user_name"]
-
+    quoted_amount = quoted_amount.split('|')
     # query
     trader_sql = f"SELECT fiat_balance, ethereum_balance FROM  Trader T WHERE T.client_id = %s"
     try:
         # fetch user info
         cursor.execute(trader_sql, (user_id, ))
         checkout_result = cursor.fetchall() 
+        if quoted_amount[0] == 0:
+            print(checkout_result[1]-float(quoted_amount[1]))
+        else:
+            print(checkout_result[0]-float(quoted_amount[0]))
     
     except con.Error as err:
         # query error
@@ -728,7 +732,7 @@ def buy():
         # query error
         print(err.msg)
 
-    return render_template('checkout.html')
+    return render_template('checkout.html', quoted_html=10)
 
 
 if __name__ == '__main__':
