@@ -702,13 +702,10 @@ def daterange_transaction_history():
 
 
 # home page
-@app.route('/buy', methods=['GET', 'POST'])
-def buy():
+@app.route('/buy/<token_id>', methods=['GET', 'POST'])
+def buy(token_id):
     if "user_id" in session:
         user_id = session["user_id"]
-
-        #remove hardcoding
-        token_id = 1
         nft_sql = f"SELECT * FROM  NFT N WHERE N.token_id = %s"
         seller_info_sql = f"SELECT T.first_name FROM  Trader T, NFT N WHERE T.ethereum_address = N.ethereum_address AND N.token_id = %s"
     try:
