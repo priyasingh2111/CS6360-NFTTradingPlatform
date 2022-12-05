@@ -21,31 +21,35 @@
             <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/331810/sample57.jpg" alt="sample57" />
             <figcaption>
                 {% set nft_name = nft_data[0][2] %}
-                {% set nft_value = nft_data[0][4] %}
+                {% set nft_value = nft_data[0][3] %}
                 {% set seller_name = seller_data[0][0] %}
                 {% block content %}
                 <h3>{{ nft_name }}</h3>
                 <p> Sold by {{ seller_name }}</p>
                 <div class="price">
-                    <p>${{ nft_value }}</p>
+                    <p>USD: ${{ nft_value }}</p>
+                </div>
+                <div class="price">
+                    <p>Ethereum Value: {{ ethereum_price }}</p>
                 </div>
                 <br>
-
-                <p> Enter Ethereum Fee</p>
+                <!-- <p> Enter Ethereum Fee</p>
                 <div>
                     <p><input type="number" id="ethereum_fee" /></p>
                 </div>
                 <br>
                 <p>OR</p>
                 <br>
-                <p> Enter Fiat Currency</p>
+                <p> Enter Fiat Currency (USD)</p>
                 <div>
                     <input type="number" id="fiat_currency">
-                </div>
+                </div> -->
                 {% endblock %}
                 <br>
             </figcaption>
-            <i class="ion-android-cart" name="buy_button" onclick="buy_nft()"></i>
+            <a href="{{url_for('checkout',token_id = nft_data[0][0])}}">
+                <i class="ion-android-cart"  name="buy_button"></i>
+            </a>
         </figure>
         <br>
         <br>
@@ -53,19 +57,4 @@
     <br>
     <br>
 </body>
-<script>
-    function buy_nft() {
-        var ethereum_fee = document.getElementById('ethereum_fee').value
-        var fiat_currency = document.getElementById('fiat_currency').value
-        // alert(ethereum_fee);
-        if (ethereum_fee > 0 || fiat_currency > 0) {
-            //redirect to checkout
-            alert("Redirect to checkout");
-        }
-        else {
-            alert("Please add the correct ethereum fees or fiat currency.");
-        }
-    }
-</script>
-
 </html>
