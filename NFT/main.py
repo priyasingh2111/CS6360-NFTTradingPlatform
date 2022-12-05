@@ -727,6 +727,29 @@ def nft_offer():
         # fetch address info
     return render_template('offer.html', nft_offer=nft_offer_result)
 
+#add nft to sell
+@app.route('/sell', methods=['GET', 'POST'])
+def sell():
+    if request.method == "POST":
+        user_id=session["user_id"]
+        token_id=20
+        name=request.form['name'].upper
+        market_value = request.form['market_value']
+        eth=f"Select ethereum_address FROM Trader T, User U WHERE T.client_id=%s"
+        new_nft=f"INSERT INTO NFT(ethereum_address, name, market_value) VALUES(%s,%s,%s)" 
+        
+        try:
+            cursor.execute(eth, (user_id,))
+            address=str(cursor.fetchall())
+            cursor.execute(new_nft,(address, name, market_value,))
+
+        except con.Error as err:
+            print(err)
+            return render_template('Error-404.html')
+
+    return render_template('sell.html')
+
+
 
 
 # home page
