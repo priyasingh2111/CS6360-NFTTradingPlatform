@@ -17,6 +17,8 @@ import requests
 app = Flask(__name__)
 app.secret_key = "key"
 
+comission_gold = 0.10
+comission_silver = 0.30
 
 # login page
 @app.route('/', methods=['GET', 'POST'])
@@ -675,11 +677,89 @@ def manager_dashboard():
 
     return render_template('manager_dashboard.html')
 
-@app.route('/checkout/<token_id>')
+@app.route('/checkout/<token_id>', methods=['GET', 'POST',])
 def checkout(token_id):
-    print(token_id)
-    return render_template('checkout.html', token_id=token_id)
+    #print(token_id)
+    user_id = session["user_id"]
+    user_name = session["user_name"]
+    sql1 = f"SELECT T.fiat_balance, T.ethereum_balance, T.level, T.client_id FROM Trader T WHERE T.client_id = %s "
+    sql2 = f"SELECT market_value, ethereum_address FROM NFT WHERE token_id = %s "
+    tr_amt=0
+    try:
+            request = requests.get("https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD")
+            ethereum_in_usd = float(request.text.split(":")[1][:-1])
+            # execute query
+            cursor.execute(sql1, (user_id, ))
+            result1 = cursor.fetchall()
+            #print(result1)
 
+            cursor.execute(sql2, (token_id, ))
+            result2 = cursor.fetchall()
+            print(result2)
+            if result1[0][2] == "SILVER":
+                tr_amt = float(result2[0][0])*comission_silver + float(result2[0][0])
+            else:
+                tr_amt = float(result2[0][0])*comission_gold + float(result2[0][0])
+            #print(tr_amt)
+            tr_amt_eth = round(tr_amt/ethereum_in_usd,8)
+            balance_USD = result1[0][0]
+            ethereum_price = round(balance_USD/ethereum_in_usd,8)
+            #print(ethereum_price)
+            if tr_amt_eth > ethereum_price:
+                message = "Cannot complete transaction."
+                #return redirect(url_for('home'))
+            else:
+                message = "You have sufficient balance, order placed. "
+                sql4 = f"SELECT T.client_id FROM Trader T WHERE T.ethereum_address = %s " 
+                sql3 = f"INSERT INTO offer VALUES (%s , %s , %s , %s) "
+                try:
+                    cursor.execute(sql4, (result2[0][1], ))
+                    seller_id = cursor.fetchall()
+                    print(seller_id)
+                    cursor.execute(sql3, (token_id, tr_amt_eth, result1[0][3], seller_id[0][0],))
+                    db.commit()
+                except Exception as err:
+                    # query error
+                    print(err)    
+                    return render_template('Error-404.html')
+
+    except Exception as err :
+            # query error
+            print(err)     
+            return render_template('Error-404.html')
+
+    return render_template('checkout.html', token_id=token_id, tr_amt = tr_amt_eth, message=message )
+
+
+@app.route('/user_validation/<token_id>',  methods=['GET', 'POST',])
+def user_validation(token_id):
+    #print(token_id)
+    # if user enters the username & password
+    if request.method == "POST":
+        # get the username and password
+        login_name = request.form['login_name']
+        password = request.form['password']
+
+        sql = f"SELECT T.login, T.client_id FROM Trader T, User U WHERE T.login = U.login AND T.login = %s AND " \
+              f"U.password = %s "
+        try:
+            # execute query
+            cursor.execute(sql, (login_name, password,))
+            result = cursor.fetchall()
+            print(result)
+            # if there exist such user in DB
+            print(session["user_name"])
+            if len(result)!=0 and session["user_id"] == result[0][1]:
+                return redirect(url_for("checkout", token_id=token_id))
+            else:
+                # no such user in DB
+                flash("Wrong Username or Password", "info")
+                return render_template('user_validation.html', token_id=token_id)
+        except con.Error as err:
+            # query error
+            print(err.msg)
+            
+    return render_template('user_validation.html', token_id=token_id)
 
 
 @app.route("/daterange_transaction_history",methods=['POST','GET'])

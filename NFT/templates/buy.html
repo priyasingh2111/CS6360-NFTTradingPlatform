@@ -47,7 +47,10 @@
                 {% endblock %}
                 <br>
             </figcaption>
-            <a href="{{url_for('checkout',token_id = nft_data[0][0])}}">
+            <!-- <a href="{{url_for('checkout',token_id = nft_data[0][0])}}">
+                <i class="ion-android-cart"  name="buy_button"></i>
+            </a> -->
+            <a href="{{url_for('user_validation',token_id = nft_data[0][0])}}">
                 <i class="ion-android-cart"  name="buy_button"></i>
             </a>
         </figure>

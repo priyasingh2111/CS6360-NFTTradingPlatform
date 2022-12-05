@@ -1,17 +1,12 @@
 body {
     line-height: 1.25;
     font-family: "Times New Roman", Times, serif;
-    color: white;
-    background-attachment: fixed;
-    background-image: linear-gradient(to right bottom, #0d5ed9, #0095ff, #00bdda, #00db84, #a8eb12);
-
 }
 
 
 h2{
   float: center;
   text-align:center;
-  color: white;
 }
 
 table {
@@ -22,13 +17,10 @@ table {
     width: 50%;
     height: 80%;
     table-layout:auto;
-    color: white;
 }
 
 table tr {
   border-radius: 10px 10px 10px 10px;
-  background-image: url(../images/profile1.jpg);
-  color: white;  
 }
 
 
@@ -36,7 +28,6 @@ table td {
   font-size: 17px;
   padding: 10px;
     text-align: left;
-    color: white;
 }
 
 
@@ -45,7 +36,6 @@ table td a{
     text-decoration: none;
     border: 2px solid BLACK;
     border-radius: 5px;
-    color: white;
     font-size: 20px;
 }
 
@@ -56,5 +46,4 @@ a:hover{
 .checkout_style{
   text-align: center;
   vertical-align: middle;
-  color: white;
 }
