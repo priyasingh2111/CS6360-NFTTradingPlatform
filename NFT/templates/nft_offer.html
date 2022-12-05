@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	  <link rel="stylesheet" href="{{url_for('static', filename='css/owned_nfts.css')}}">
+    <title>NFT Trading Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" 
+    integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <style>
+	  body
+         {
+            background-image: url({{url_for('static', filename='images/profile.jpg')}});
+	        background-size: cover;
+ 	        background-attachment: fixed;
+         }
+    </style>
+</head>
+<body>
+{% include "navbar.html"%}
+<br/>
+<h2><center>Available Offers</center></h2>
+<table class="table">
+    {% for offer in nft_offer%}
+    <thead>
+    <col>
+    <colgroup span="2"></colgroup>
+    <colgroup span="2"></colgroup>
+    <tr><th scope='col' align="center" colspan="5"><center>{{offer[0]}}<br/>NFT Token Id: {{offer[1]}}</center></th></tr>
+    <tr>
+        <th rowspan="2">Buyer Id <br/>Address</th>
+        <th colspan="2" scope="colgroup">Offered Value</th>
+        <th rowspan="2">Decide</th>
+    </tr>
+    <tr>
+        <th scope="col">Fiat Value</th>
+        <th scope="col">Ethereum Value</th>
+    </tr>
+</thead>
+<tbody>
+    <tr>
+        <td>{{offer[4]}}</td>
+        <td>{{offer[2]}}</td>
+        <td>{{offer[3}}</td>
+        <td><button>Accept</button>/<button>Decline</button></td>
+    </tr>	
+    {% endfor %}
+
+</tbody>
+</table>
+<br>
+<br>
+<br>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" 
+integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+</body>
+</html>

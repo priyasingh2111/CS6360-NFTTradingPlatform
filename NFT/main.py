@@ -707,6 +707,30 @@ def daterange_transaction_history():
             print(err.msg)
         
         return jsonify({'htmlresponse': render_template('daterange_transactions.html')})
+   
+
+#offers
+@app.route('/nft_offer')
+def nft_offer():
+    user_id = session["user_id"]
+    user_name = session["user_name"]
+
+    # query
+    nft_offer_sql = f"SELECT N.name, O.token_id, O.fiat_balance, O.ethereum_balance, O.buyerid FROM NFT N , offer O, Trader T1, Trader T2, Transaction TR WHERE N.token_id=O.token_id, O.buyerid = T1.client_id, O.sellerid = T2.client_id,T1.client_id != T2.client_id, TR.seller_ethereum_address = T1.ethereum_address"
+    
+    try:
+        # fetch user info
+        cursor.execute(nft_offer_sql, (user_id,))
+        nft_offer_result = cursor.fetchall()
+        print(nft_offer_result)
+    
+    except con.Error as err:
+        # query error
+        print(err.msg)
+        return render_template('Error-404.html')
+        # fetch address info
+    return render_template('offer.html', nft_offer=nft_offer_result)
+
 
 
 # home page

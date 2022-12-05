@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="sell.css"/>
+    <title>Add Nft to sell</title>
+  
+</head>
+<body>
+    {% include "navbar.html"%}
+    <br />
+    <br />
+    {% for sell in sell_nft%}
+    <div align="center">
+        <h2>Add a new NFT to Sell</h2>   
+        <form  method = "post" action = "/sell">
+            <div class="center">
+                <div class="container">
+                    <div class="upload_icon">
+                        <center>
+                            <img src="upload.png" height="35" width="30">
+                        </center>
+                    </div>
+                    <header>Drag & Drop To Upload New NFT</header>
+                    <span>OR</span>
+                <button>Browse</button>
+                </div>  
+            </div>     
+        </form>
+        <br>
+        <div class="nftdetails">
+
+        </div>
+    </div>
+    {% endfor %}
+
+</body>
+
+</html>

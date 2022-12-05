@@ -32,6 +32,17 @@ in the the `connector.py`. This DB is hosted on AWS.
 Once the code is compiled and run, a link to the website 
 will appear on the terminal.
 
+## Implemented By
+Michael Zayne Lumpkin, mzl190000
+
+Siddhi Mahesh Potdar, smp220001
+
+Desong Li, dxl180019
+
+Tanya Sharma, txs220004
+
+Priya Singh, pxs220067
+
 
 
 
