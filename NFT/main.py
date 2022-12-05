@@ -5,6 +5,7 @@ Desong Li, dxl180019
 Tanya Sharma, txs220004
 Priya Singh, pxs220067
 '''
+import json
 from flask import Flask, request, render_template, redirect, url_for, session, flash, jsonify
 import mysql.connector as con
 from connector import cursor, db
@@ -579,23 +580,43 @@ def transaction_history():
 @app.route('/cancel_transaction/<tr_id>')
 def cancel_transaction(tr_id):
     #cancel transaction by id + 15 min check logic
-    cancel_transaction_time_sql = f"SELECT date FROM Transaction WHERE transaction_id = %s"
+    cancel_transaction_time_sql = f"SELECT * FROM Transaction WHERE transaction_id = %s"
     cancel_transaction_sql = f"UPDATE  Transaction Tr SET Tr.cancelled = 1 WHERE Tr.transaction_id = %s"
-    #print(tr_id)
-    #todo-update timestamp also + check for 15 min logic (here and in html page)
+
+    # add money to buyer
+    buyer_add_amount_sql = f"UPDATE  Trader T SET T.ethereum_balance =  T.ethereum_balance + %s WHERE T.ethereum_address = %s"
+
+    # deduct money from sender
+    seller_deduct_amount_sql = f"UPDATE  Trader T SET T.ethereum_balance =  T.ethereum_balance - %s WHERE T.ethereum_address = %s"
+
+    #nft address update + market value (to check)
+    #nft_address_update_sql = f"UPDATE  NFT N SET N.ethereum_address = %s WHERE N.ethereum_address = %s"
+
     try:
         #get date query
         cursor.execute(cancel_transaction_time_sql, (tr_id,))
         transaction_date_result = cursor.fetchall()
 
         current_date = datetime.datetime.now()
-        diff = current_date - transaction_date_result[0][0]
+        diff = current_date - transaction_date_result[0][9]
         minutes = divmod(diff.seconds, 60)
 
         if minutes[0] >= 15:
             flash(f"You may only cancel the transaction that is placed within 15 minutes", "info")
 
         else: 
+            transaction_amount = transaction_date_result[0][2]
+            buyer_ethereum_address = transaction_date_result[0][3]
+            seller_ethereum_address = transaction_date_result[0][4]
+
+            #update buyer amount
+            cursor.execute(buyer_add_amount_sql, (transaction_amount,buyer_ethereum_address))
+            db.commit()
+            
+            #update seller amount
+            cursor.execute(seller_deduct_amount_sql, (transaction_amount,seller_ethereum_address))
+            db.commit()
+
             # update query
             cursor.execute(cancel_transaction_sql, (tr_id,))
             #todo - after cancelling transaction - what to do?
@@ -654,25 +675,12 @@ def manager_dashboard():
 
     return render_template('manager_dashboard.html')
 
-@app.route('/checkout')
-def checkout():
-    user_id = session["user_id"]
-    user_name = session["user_name"]
+@app.route('/checkout/<token_id>')
+def checkout(token_id):
+    print(token_id)
+    return render_template('checkout.html', token_id=token_id)
 
-    # query
-    trader_sql = f"SELECT fiat_balance, ethereum_balance FROM  Trader T WHERE T.client_id = %s"
-    try:
-        # fetch user info
-        cursor.execute(trader_sql, (user_id, ))
-        checkout_result = cursor.fetchall() 
-    
-    except con.Error as err:
-        # query error
-        print(err.msg)
-        # fetch address info
-    return render_template('checkout.html', checkout_result=checkout_result)
 
-        
 
 @app.route("/daterange_transaction_history",methods=['POST','GET'])
 def daterange_transaction_history(): 
@@ -714,18 +722,26 @@ def buy(token_id):
         nft_sql_result = cursor.fetchall()
         print(nft_sql_result)
 
+        nft_price = nft_sql_result[0][3]
+        request = requests.get("https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD")
+        ethereum_in_usd = float(request.text.split(":")[1][:-1])
+        print(ethereum_in_usd)
+
+        ethereum_price = round(nft_price/ethereum_in_usd,8)
+        print(ethereum_price)
+
         #fetch seller info
         cursor.execute(seller_info_sql, (token_id,))
         seller_info_sql_result = cursor.fetchall()
         print(seller_info_sql_result)
 
-        return render_template('buy.html', nft_data=nft_sql_result, seller_data = seller_info_sql_result)
+        return render_template('buy.html', nft_data=nft_sql_result, seller_data = seller_info_sql_result, ethereum_price = ethereum_price)
 
     except con.Error as err:
         # query error
         print(err.msg)
 
-    return render_template('checkout.html')
+        return render_template('buy.html')
 
 
 if __name__ == '__main__':
