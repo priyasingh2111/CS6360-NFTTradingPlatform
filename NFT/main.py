@@ -796,7 +796,7 @@ def nft_offer():
     user_name = session["user_name"]
 
     # query
-    nft_offer_sql = f"SELECT N.name, O.token_id, O.fiat_balance, O.ethereum_balance, O.buyerid FROM NFT N , offer O, Trader T1, Trader T2, Transaction TR WHERE N.token_id=O.token_id, O.buyerid = T1.client_id, O.sellerid = T2.client_id,T1.client_id != T2.client_id, TR.seller_ethereum_address = T1.ethereum_address"
+    nft_offer_sql = f"SELECT N.name, O.nft_id, O.ethereum_balance, O.buyerid FROM NFT N, offer O, Trader T WHERE T.client_id=%s AND T.client_id=O.sellerid AND N.token_id=O.nft_id"
     
     try:
         # fetch user info
@@ -805,34 +805,30 @@ def nft_offer():
         print(nft_offer_result)
     
     except con.Error as err:
-        # query error
-        print(err.msg)
+        print(err)
         return render_template('Error-404.html')
-        # fetch address info
-    return render_template('offer.html', nft_offer=nft_offer_result)
+      
+    return render_template('nft_offer.html', nft_offer=nft_offer_result)
 
-#add nft to sell
 @app.route('/sell', methods=['GET', 'POST'])
 def sell():
     if request.method == "POST":
-        user_id=session["user_id"]
-        token_id=20
-        name=request.form['name'].upper
-        market_value = request.form['market_value']
-        eth=f"Select ethereum_address FROM Trader T, User U WHERE T.client_id=%s"
-        new_nft=f"INSERT INTO NFT(ethereum_address, name, market_value) VALUES(%s,%s,%s)" 
+        user_id = session["user_id"]
+        nft_name=request.form['nft_name']
+        nft_market_value = request.form['market_value']
+        new_nft=f"INSERT INTO NFT(ethereum_address, name, market_value) VALUES((SELECT T.ethereum_address FROM Trader T WHERE T.client_id=%s),%s,%s)" 
         
         try:
-            cursor.execute(eth, (user_id,))
-            address=str(cursor.fetchall())
-            cursor.execute(new_nft,(address, name, market_value,))
+            cursor.execute(new_nft, (user_id,nft_name,nft_market_value))
+            db.commit()
+            return redirect(url_for("owned_nfts"))
 
         except con.Error as err:
             print(err)
             return render_template('Error-404.html')
-
-    return render_template('sell.html')
-
+            
+    else:
+        return render_template('sell.html')
 
 
 
