@@ -20,25 +20,25 @@
     <br/>
 
     <div align="center">
-        <h2>Add a new NFT to Sell</h2>
-        
-            <div class="center">
-                <b> <center> NFT Details</center></b><br/>
-                <form  method = "post" action = "/sell">
-                    <label for="name" id="tab">NFT Name : </label>
-                    <input type="text" id="name" name="name" placeholder="Enter Nft name" required>
-                    <p>
-                    <label for="value" id="tab">NFT Price  : </label>
-                    <input type="number" id="market_value" name="market_value" placeholder="Enter Nft price" required>
-                    </p>
-                </form>
-                <br/>
-                <p>
-                    <a href="{{url_for('owned_nfts')}}"><button>Add</button></a>
-                </p>
-            </div>   
-        
-        <br>
-    </div>
+        <h2>Add a new NFT to Sell</h2><br/>
+        <b> <center> NFT Details</center></b><br/>
+        <form action = "/sell" method = "post"> 
+            <label for="nft_name">NFT Name : </label>
+            <input type="text" name="nft_name" placeholder="Enter Nft name" required>
+            <p><br/>
+            <label for="market_value">NFT Price  : </label>
+            <input type="number" name="market_value" placeholder="Enter Nft price" required>
+            </p><br/>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for msg in messages %}
+                    <h1>{{msg}}</h1>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+            <div class = "edit"><input type = "submit"  name = "Add"></div>
+        </form>
+    </div>   
+    <br>    
 </body>
 </html>
