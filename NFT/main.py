@@ -549,8 +549,6 @@ def owned_nfts():
     return render_template('owned_nfts.html', owned_nfts=owned_nft_result)
 
 # transaction_history
-
-
 @app.route('/transaction_history')
 def transaction_history():
     user_id = session["user_id"]
@@ -884,10 +882,13 @@ def confirmation(nft,buyer):
         get_NFT_val = f'SELECT market_value FROM NFT N where N.token_id=%s'
         
         #get user rank
-        get_rank = f'SELECT T.level FROM Trader T where T.token_id=%s'
+        get_rank = f'SELECT T.level FROM Trader T where T.client_id=%s'
         
         #insert transaction
-        insert_trans = f'INSERT INTO Transaction(cancelled, ethereum_value, ethereum_buyer_address, ethereum_seller_address, token_id, ethereum_nft_address, commission_type, commission_paid, date) VALUES (0, %s, %s, %s, %s, %s, %s, %s)' 
+        insert_trans = f'INSERT INTO Transaction(transaction_id, cancelled, ethereum_value, ethereum_buyer_address, ethereum_seller_address, token_id, ethereum_nft_address, commission_type, commission_paid, date) VALUES (%s, 0, %s, %s, %s, %s, %s, %s, %s, %s)' 
+        
+        #delete offer
+        del_offer = f'DELETE FROM offer O WHERE O.nft_id=%s AND O.buyerid=%s AND O.sellerid=%s'
         
         try:
             #get offer
@@ -939,19 +940,23 @@ def confirmation(nft,buyer):
             #get market val
             cursor.execute(get_NFT_val, (nft,))
             market_val = cursor.fetchall()[0][0]
+            print(f'market value: {market_val}')
             
             #get buyer rank
             cursor.execute(get_rank, (offer[3],))
             rank = cursor.fetchall()[0][0]
+            print(f'rank: {rank}')
             commission = ((0.3) if rank == 'SILVER' else (0.1))*market_val
             
             #create new transaction entry
-            cursor.execute(insert_trans, (market_val, buyer_address, seller_address, nft, seller_address, rank[0], commission, datetime.datetime.now()))
+            cursor.execute(insert_trans, (random.randint(100000,999999),market_val, buyer_address, seller_address, nft, seller_address, rank[0], commission, datetime.datetime.now()))
             db.commit()
             
-            print('transaction happened')
+            print('transaction inserted')
             
             #delete offer
+            cursor.execute(del_offer, (nft, offer[3], user_id))
+            db.commit()
             
                     
             
