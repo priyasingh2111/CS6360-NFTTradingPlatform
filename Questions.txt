@@ -1,2 +1,0 @@
-q1. what about the record of the cancelled transaction?
-ie when the  transaction is cancelled?
