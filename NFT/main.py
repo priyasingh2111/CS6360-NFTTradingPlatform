@@ -796,7 +796,7 @@ def nft_offer():
     user_name = session["user_name"]
 
     # query
-    nft_offer_sql = f"SELECT N.name, O.nft_id, O.ethereum_balance, O.buyerid FROM NFT N, offer O, Trader T WHERE T.client_id=%s AND T.client_id=O.sellerid AND N.token_id=O.nft_id"
+    nft_offer_sql = f"SELECT N.name, O.nft_id, O.ethereum_balance, O.buyerid,, O.fiat_balance FROM NFT N, offer O, Trader T WHERE T.client_id=%s AND T.client_id=O.sellerid AND N.token_id=O.nft_id"
     
     try:
         # fetch user info
