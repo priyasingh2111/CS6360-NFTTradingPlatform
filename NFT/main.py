@@ -560,7 +560,7 @@ def transaction_history():
     trader_sql = f"SELECT T.ethereum_address FROM  Trader T , User U WHERE T.login = U.login AND U.login = %s AND T.client_id = %s"
 
     # get transactions for ethereum address for buy/sell
-    transactions_sql = f"SELECT Tr.ethereum_nft_address, Tr.commission_type, Tr.commission_paid, Tr.date, Tr.ethereum_value, Tr.cancelled, Tr.transaction_id FROM  Trader T , User U, Transaction Tr WHERE T.login = U.login AND U.login = %s AND T.client_id = %s AND (T.ethereum_address = Tr.ethereum_seller_address OR T.ethereum_address = Tr.ethereum_buyer_address)"
+    transactions_sql = f"SELECT Tr.ethereum_nft_address, Tr.commission_type, Tr.commission_paid, Tr.date, Tr.ethereum_value, Tr.cancelled, Tr.transaction_id FROM  Trader T , User U, Transaction Tr WHERE T.login = U.login AND U.login = %s AND T.client_id = %s AND T.ethereum_address = Tr.ethereum_seller_address"
     try:
         # fetch ethereum address
         cursor.execute(trader_sql, (user_name, user_id))
@@ -570,7 +570,7 @@ def transaction_history():
         # fetch transactions
         cursor.execute(transactions_sql, (user_name, user_id))
         transactions_result = cursor.fetchall()
-        print(transactions_result)
+        #print(transactions_result)
         return render_template('transaction_history.html', transaction_details=transactions_result)
 
     except con.Error as err:
@@ -585,24 +585,14 @@ def cancel_transaction(tr_id):
     cancel_transaction_time_sql = f"SELECT * FROM Transaction WHERE transaction_id = %s"
     cancel_transaction_sql = f"UPDATE  Transaction Tr SET Tr.cancelled = 1 WHERE Tr.transaction_id = %s"
 
-    client_id_sql = f"SELECT Tr.client_id from Trader Tr WHERE Tr.ethereum_address = %s"
+    # add money to buyer
+    buyer_add_amount_sql = f"UPDATE  Trader T SET T.ethereum_balance =  T.ethereum_balance + %s WHERE T.ethereum_address = %s"
 
-    offer_sql = f"SELECT * from offer O WHERE O.nft_id = %s AND O.buyerid = %s AND O.sellerid = %s"
-
-    # add fiat to buyer
-    buyer_add_fiat_amount_sql = f"UPDATE  Trader T SET T.fiat_balance =  T.fiat_balance + %s WHERE T.client_id = %s"
-
-    # deduct fiat from seller
-    seller_deduct_fiat_amount_sql = f"UPDATE  Trader T SET T.fiat_balance =  T.fiat_balance - %s WHERE T.client_id = %s"
-
-    # add ethereum to buyer
-    buyer_add_ethereum_amount_sql = f"UPDATE  Trader T SET T.ethereum_balance =  T.ethereum_balance + %s WHERE T.client_id = %s"
-
-    # deduct ethereum from seller
-    seller_deduct_ethereum_amount_sql = f"UPDATE  Trader T SET T.ethereum_balance =  T.ethereum_balance - %s WHERE T.client_id = %s"
+    # deduct money from sender
+    seller_deduct_amount_sql = f"UPDATE  Trader T SET T.ethereum_balance =  T.ethereum_balance - %s WHERE T.ethereum_address = %s"
 
     #nft address update + market value (to check)
-    nft_address_update_sql = f"UPDATE NFT N SET N.ethereum_address = %s WHERE N.token_id = %s"
+    #nft_address_update_sql = f"UPDATE  NFT N SET N.ethereum_address = %s WHERE N.ethereum_address = %s"
 
     try:
         #get date query
@@ -617,60 +607,21 @@ def cancel_transaction(tr_id):
             flash(f"You may only cancel the transaction that is placed within 15 minutes", "info")
 
         else: 
+            transaction_amount = transaction_date_result[0][2]
             buyer_ethereum_address = transaction_date_result[0][3]
             seller_ethereum_address = transaction_date_result[0][4]
-            token_id = transaction_date_result[0][5]
 
-            #get client_id for buyer
-            cursor.execute(client_id_sql, (buyer_ethereum_address,))
-            buyer_client_id_result = cursor.fetchall()
-            buyer_client_id = buyer_client_id_result[0][0]
-
-            #get client_id for seller
-            cursor.execute(client_id_sql, (seller_ethereum_address,))
-            seller_client_id_result = cursor.fetchall()
-            seller_client_id = seller_client_id_result[0][0]
-
-            #get the offer details from offers table 
-            cursor.execute(offer_sql, (token_id,buyer_client_id,seller_client_id))
-            print(token_id)
-            print(buyer_client_id)
-            print(seller_client_id)
-            offer_result = cursor.fetchall()
-            print(offer_result)
-            fiat_amount = offer_result[0][1]
-            ethereum_amount = offer_result[0][2]
-
-            if fiat_amount > 0:
-                #deduct fiat currency for seller
-                #add fiat currency for buyer
-
-                #update buyer amount
-                cursor.execute(buyer_add_fiat_amount_sql, (fiat_amount,buyer_client_id))
-                db.commit()
+            #update buyer amount
+            cursor.execute(buyer_add_amount_sql, (transaction_amount,buyer_ethereum_address))
+            db.commit()
             
-                #update seller amount
-                cursor.execute(seller_deduct_fiat_amount_sql, (fiat_amount,seller_client_id))
-                db.commit()
-
-            elif ethereum_amount > 0:
-                #deduct ethereum for seller
-                #add ethereum for buyer
-
-                #update buyer amount
-                cursor.execute(buyer_add_ethereum_amount_sql, (ethereum_amount,buyer_client_id))
-                db.commit()
-            
-                #update seller amount
-                cursor.execute(seller_deduct_ethereum_amount_sql, (ethereum_amount,seller_client_id))
-                db.commit()
-
-            #revert nft ownership back to seller
-            cursor.execute(nft_address_update_sql, (seller_ethereum_address,token_id))
+            #update seller amount
+            cursor.execute(seller_deduct_amount_sql, (transaction_amount,seller_ethereum_address))
             db.commit()
 
             # update query
             cursor.execute(cancel_transaction_sql, (tr_id,))
+            #todo - after cancelling transaction - what to do?
             db.commit()
         return redirect(url_for("transaction_history"))
 
@@ -910,31 +861,105 @@ def sell():
         return render_template('sell.html')
 
 #Accept Offer
-@app.route('/confirmation/<token>,<buyer>', methods=['GET', 'POST'])
-def confirmation(token,buyer):
+@app.route('/confirmation/<nft>,<buyer>', methods=['GET', 'POST'])
+def confirmation(nft,buyer):
     if "user_id" in session:
         user_id = session["user_id"]
-        amount=f"Select ethereum_balance FROM offer WHERE sellerid=%s AND nft_id=%s AND buyerid=%s"
-        change=f"Update offer SET sellerid=%s WHERE sellerid=%s AND nft_id=%s"
-        change2=f"DELETE FROM offer WHERE sellerid=buyerid"
-        trans=f"Update Trader T SET T.ethereum_balance=T.ethereum_balance+(SELECT O.ethereum_balance FROM offer O WHERE O.nft_id=%s AND O.sellerid=%s AND O.buyerid=%s) WHERE T.client_id=%s"
+        
+        #fetch offer
+        get_offer=f"Select * FROM offer WHERE sellerid=%s AND nft_id=%s AND buyerid=%s"
+        
+        #get address of user id
+        get_address = f'Select T.ethereum_address FROM Trader T WHERE T.client_id=%s'
+        
+        #Update ownership of NFT
+        change=f"UPDATE NFT SET ethereum_address = %s WHERE ethereum_address = %s AND token_id = %s"
+        
+        #transfer funds  
+        fetch_balance = f'Select T.ethereum_balance, T.fiat_balance From Trader T Where T.client_id=%s' 
+        add_eth=f"UPDATE Trader T SET T.ethereum_balance = %s WHERE client_id = %s"
+        add_fiat=f"UPDATE Trader T SET T.fiat_balance = %s WHERE client_id = %s"
+        
+        #get NFT_market_val
+        get_NFT_val = f'SELECT market_value FROM NFT N where N.token_id=%s'
+        
+        #get user rank
+        get_rank = f'SELECT T.level FROM Trader T where T.token_id=%s'
+        
+        #insert transaction
+        insert_trans = f'INSERT INTO Transaction(cancelled, ethereum_value, ethereum_buyer_address, ethereum_seller_address, token_id, ethereum_nft_address, commission_type, commission_paid, date) VALUES (0, %s, %s, %s, %s, %s, %s, %s)' 
         
         try:
-            cursor.execute(amount,(user_id,token,buyer))
-            amtt=cursor.fetchall()
-            cursor.execute(trans,(token,user_id,buyer,user_id))
+            #get offer
+            cursor.execute(get_offer,(user_id,nft,buyer))
+            offer = cursor.fetchall()[0]
+            print(offer)
+            
+            is_eth = offer[2] > offer[1]
+            amount = offer[2] if is_eth else offer[1]
+            print(amount)
+            
+            #find addresses
+            cursor.execute(get_address,(offer[3],))
+            buyer_address  = cursor.fetchall()[0][0]
+            cursor.execute(get_address,(offer[4],))
+            seller_address = cursor.fetchall()[0][0]
+            print(f'Buyer address is {buyer_address}, seller is {seller_address}')
+            
+            #transfer ownership
+            cursor.execute(change,(buyer_address, seller_address, nft))
             db.commit()
-            cursor.execute(change,(buyer,user_id,token))
+            print(f'changing owner of {nft} from {offer[4]} to {offer[3]}')
+            
+            #add funds to seller
+            cursor.execute(fetch_balance, (user_id,))
+            balance = cursor.fetchall()[0]
+            new_balance = (balance[0] if is_eth else balance[1]) + amount
+ 
+            if is_eth:
+                cursor.execute(add_eth, (new_balance, user_id))
+            else:
+                cursor.execute(add_fiat, (new_balance, user_id,))
+                
+            #subtract funds from buyer
+            cursor.execute(fetch_balance, (offer[3],))
+            balance = cursor.fetchall()[0]
+            new_balance = (balance[0] if is_eth else balance[1]) - amount
+            
+            if is_eth:
+                cursor.execute(add_eth, (new_balance, offer[3]))
+            else:
+                cursor.execute(add_fiat, (new_balance, offer[3],))
+                
+            print('funds transferred')
             db.commit()
-            cursor.execute(change2)
+            
+            #create transaction
+            
+            #get market val
+            cursor.execute(get_NFT_val, (nft,))
+            market_val = cursor.fetchall()[0][0]
+            
+            #get buyer rank
+            cursor.execute(get_rank, (offer[3],))
+            rank = cursor.fetchall()[0][0]
+            commission = ((0.3) if rank == 'SILVER' else (0.1))*market_val
+            
+            #create new transaction entry
+            cursor.execute(insert_trans, (market_val, buyer_address, seller_address, nft, seller_address, rank[0], commission, datetime.datetime.now()))
             db.commit()
+            
+            print('transaction happened')
+            
+            #delete offer
+            
                     
             
         except con.Error as err:
             print(err.msg)
             return render_template('Error-404.html')
         
-    return render_template('confirmation.html',amt=amtt)
+    return render_template('confirmation.html',amt=amount)
 
 
 # home page
