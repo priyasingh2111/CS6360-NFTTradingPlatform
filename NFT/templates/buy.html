@@ -18,7 +18,6 @@
 
     <div align="center">
         <figure class="snip1423">
-            <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/331810/sample57.jpg" alt="sample57" />
             <figcaption>
                 {% set nft_name = nft_data[0][2] %}
                 {% set nft_value = nft_data[0][3] %}
@@ -33,31 +32,30 @@
                     <p>Ethereum Value: {{ ethereum_price }}</p>
                 </div>
                 <br>
-                <!-- <p> Enter Ethereum Fee</p>
-                <div>
-                    <p><input type="number" id="ethereum_fee" /></p>
-                </div>
-                <br>
-                <p>OR</p>
-                <br>
-                <p> Enter Fiat Currency (USD)</p>
-                <div>
-                    <input type="number" id="fiat_currency">
-                </div> -->
                 {% endblock %}
                 <br>
             </figcaption>
-            <!-- <a href="{{url_for('checkout',token_id = nft_data[0][0])}}">
-                <i class="ion-android-cart"  name="buy_button"></i>
-            </a> -->
-            <a href="{{url_for('user_validation',token_id = nft_data[0][0])}}">
-                <i class="ion-android-cart"  name="buy_button"></i>
-            </a>
+
         </figure>
         <br>
         <br>
+
+        {% set token_id_nft = nft_data[0][0] | string() %}
+        {% set ethereum_token_id = "e|" + token_id_nft %}
+        {% set usd_token_id = "u|" + token_id_nft %}
+
+        <h4>Select Currency for Transaction</h4>
+        <a href="{{url_for('user_validation',token_id = ethereum_token_id )}}"> 
+            <button class="buttonE" >Buy in Ethereum</button>
+        </a>
+
+        <a href="{{url_for('user_validation',token_id = usd_token_id )}}"> 
+            <button class="buttonU" >Buy in USD</button>
+        </a>
+
     </div>
     <br>
     <br>
 </body>
+
 </html>
