@@ -830,6 +830,29 @@ def sell():
     else:
         return render_template('sell.html')
 
+#Accept Offer
+@app.route('/confirmation/<token>,<buyer>', methods=['GET', 'POST'])
+def confirmation(token,buyer):
+    if "user_id" in session:
+        user_id = session["user_id"]
+        amount=f"Select ethereum_balance FROM offer WHERE sellerid=%s AND nft_id=%s AND buyerid=%s"
+        change=f"Update offer SET sellerid=%s WHERE sellerid=%s AND nft_id=%s"
+        trans=f"Update Trader T SET T.ethereum_balance=T.ethereum_balance+(SELECT O.ethereum_balance FROM offer O WHERE O.nft_id=%s AND O.sellerid=%s AND O.buyerid=%s) AND T.client_id=%s"
+        
+        try:
+            cursor.execute(amount,(user_id,token,buyer))
+            amtt=cursor.fetchall()
+            cursor.execute(change,(buyer,user_id,token))
+            db.commit()
+            cursor.execute(trans,(token,user_id,buyer,user_id))
+            db.commit()
+                    
+            
+        except con.Error as err:
+            print(err.msg)
+            return render_template('Error-404.html')
+        
+    return render_template('confirmation.html',amt=amtt)
 
 
 # home page
