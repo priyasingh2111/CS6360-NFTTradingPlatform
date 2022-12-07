@@ -875,7 +875,7 @@ def nft_offer():
     user_name = session["user_name"]
 
     # query
-    nft_offer_sql = f"SELECT N.name, O.nft_id, O.ethereum_balance, O.buyerid,, O.fiat_balance FROM NFT N, offer O, Trader T WHERE T.client_id=%s AND T.client_id=O.sellerid AND N.token_id=O.nft_id"
+    nft_offer_sql = f"SELECT N.name, O.nft_id, O.ethereum_balance, O.buyerid, O.fiat_balance FROM NFT N, offer O, Trader T WHERE T.client_id=%s AND T.client_id=O.sellerid AND N.token_id=O.nft_id"
     
     try:
         # fetch user info
@@ -916,14 +916,17 @@ def confirmation(token,buyer):
         user_id = session["user_id"]
         amount=f"Select ethereum_balance FROM offer WHERE sellerid=%s AND nft_id=%s AND buyerid=%s"
         change=f"Update offer SET sellerid=%s WHERE sellerid=%s AND nft_id=%s"
-        trans=f"Update Trader T SET T.ethereum_balance=T.ethereum_balance+(SELECT O.ethereum_balance FROM offer O WHERE O.nft_id=%s AND O.sellerid=%s AND O.buyerid=%s) AND T.client_id=%s"
+        change2=f"DELETE FROM offer WHERE sellerid=buyerid"
+        trans=f"Update Trader T SET T.ethereum_balance=T.ethereum_balance+(SELECT O.ethereum_balance FROM offer O WHERE O.nft_id=%s AND O.sellerid=%s AND O.buyerid=%s) WHERE T.client_id=%s"
         
         try:
             cursor.execute(amount,(user_id,token,buyer))
             amtt=cursor.fetchall()
+            cursor.execute(trans,(token,user_id,buyer,user_id))
+            db.commit()
             cursor.execute(change,(buyer,user_id,token))
             db.commit()
-            cursor.execute(trans,(token,user_id,buyer,user_id))
+            cursor.execute(change2)
             db.commit()
                     
             
