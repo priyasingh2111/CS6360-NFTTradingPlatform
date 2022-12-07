@@ -560,7 +560,7 @@ def transaction_history():
     trader_sql = f"SELECT T.ethereum_address FROM  Trader T , User U WHERE T.login = U.login AND U.login = %s AND T.client_id = %s"
 
     # get transactions for ethereum address for buy/sell
-    transactions_sql = f"SELECT Tr.ethereum_nft_address, Tr.commission_type, Tr.commission_paid, Tr.date, Tr.ethereum_value, Tr.cancelled, Tr.transaction_id FROM  Trader T , User U, Transaction Tr WHERE T.login = U.login AND U.login = %s AND T.client_id = %s AND T.ethereum_address = Tr.ethereum_seller_address"
+    transactions_sql = f"SELECT Tr.ethereum_nft_address, Tr.commission_type, Tr.commission_paid, Tr.date, Tr.ethereum_value, Tr.cancelled, Tr.transaction_id FROM  Trader T , User U, Transaction Tr WHERE T.login = U.login AND U.login = %s AND T.client_id = %s AND (T.ethereum_address = Tr.ethereum_seller_address OR T.ethereum_address = Tr.ethereum_buyer_address)"
     try:
         # fetch ethereum address
         cursor.execute(trader_sql, (user_name, user_id))
@@ -570,7 +570,7 @@ def transaction_history():
         # fetch transactions
         cursor.execute(transactions_sql, (user_name, user_id))
         transactions_result = cursor.fetchall()
-        #print(transactions_result)
+        print(transactions_result)
         return render_template('transaction_history.html', transaction_details=transactions_result)
 
     except con.Error as err:
@@ -585,14 +585,24 @@ def cancel_transaction(tr_id):
     cancel_transaction_time_sql = f"SELECT * FROM Transaction WHERE transaction_id = %s"
     cancel_transaction_sql = f"UPDATE  Transaction Tr SET Tr.cancelled = 1 WHERE Tr.transaction_id = %s"
 
-    # add money to buyer
-    buyer_add_amount_sql = f"UPDATE  Trader T SET T.ethereum_balance =  T.ethereum_balance + %s WHERE T.ethereum_address = %s"
+    client_id_sql = f"SELECT Tr.client_id from Trader Tr WHERE Tr.ethereum_address = %s"
 
-    # deduct money from sender
-    seller_deduct_amount_sql = f"UPDATE  Trader T SET T.ethereum_balance =  T.ethereum_balance - %s WHERE T.ethereum_address = %s"
+    offer_sql = f"SELECT * from offer O WHERE O.nft_id = %s AND O.buyerid = %s AND O.sellerid = %s"
+
+    # add fiat to buyer
+    buyer_add_fiat_amount_sql = f"UPDATE  Trader T SET T.fiat_balance =  T.fiat_balance + %s WHERE T.client_id = %s"
+
+    # deduct fiat from seller
+    seller_deduct_fiat_amount_sql = f"UPDATE  Trader T SET T.fiat_balance =  T.fiat_balance - %s WHERE T.client_id = %s"
+
+    # add ethereum to buyer
+    buyer_add_ethereum_amount_sql = f"UPDATE  Trader T SET T.ethereum_balance =  T.ethereum_balance + %s WHERE T.client_id = %s"
+
+    # deduct ethereum from seller
+    seller_deduct_ethereum_amount_sql = f"UPDATE  Trader T SET T.ethereum_balance =  T.ethereum_balance - %s WHERE T.client_id = %s"
 
     #nft address update + market value (to check)
-    #nft_address_update_sql = f"UPDATE  NFT N SET N.ethereum_address = %s WHERE N.ethereum_address = %s"
+    nft_address_update_sql = f"UPDATE NFT N SET N.ethereum_address = %s WHERE N.token_id = %s"
 
     try:
         #get date query
@@ -607,21 +617,60 @@ def cancel_transaction(tr_id):
             flash(f"You may only cancel the transaction that is placed within 15 minutes", "info")
 
         else: 
-            transaction_amount = transaction_date_result[0][2]
             buyer_ethereum_address = transaction_date_result[0][3]
             seller_ethereum_address = transaction_date_result[0][4]
+            token_id = transaction_date_result[0][5]
 
-            #update buyer amount
-            cursor.execute(buyer_add_amount_sql, (transaction_amount,buyer_ethereum_address))
-            db.commit()
+            #get client_id for buyer
+            cursor.execute(client_id_sql, (buyer_ethereum_address,))
+            buyer_client_id_result = cursor.fetchall()
+            buyer_client_id = buyer_client_id_result[0][0]
+
+            #get client_id for seller
+            cursor.execute(client_id_sql, (seller_ethereum_address,))
+            seller_client_id_result = cursor.fetchall()
+            seller_client_id = seller_client_id_result[0][0]
+
+            #get the offer details from offers table 
+            cursor.execute(offer_sql, (token_id,buyer_client_id,seller_client_id))
+            print(token_id)
+            print(buyer_client_id)
+            print(seller_client_id)
+            offer_result = cursor.fetchall()
+            print(offer_result)
+            fiat_amount = offer_result[0][1]
+            ethereum_amount = offer_result[0][2]
+
+            if fiat_amount > 0:
+                #deduct fiat currency for seller
+                #add fiat currency for buyer
+
+                #update buyer amount
+                cursor.execute(buyer_add_fiat_amount_sql, (fiat_amount,buyer_client_id))
+                db.commit()
             
-            #update seller amount
-            cursor.execute(seller_deduct_amount_sql, (transaction_amount,seller_ethereum_address))
+                #update seller amount
+                cursor.execute(seller_deduct_fiat_amount_sql, (fiat_amount,seller_client_id))
+                db.commit()
+
+            elif ethereum_amount > 0:
+                #deduct ethereum for seller
+                #add ethereum for buyer
+
+                #update buyer amount
+                cursor.execute(buyer_add_ethereum_amount_sql, (ethereum_amount,buyer_client_id))
+                db.commit()
+            
+                #update seller amount
+                cursor.execute(seller_deduct_ethereum_amount_sql, (ethereum_amount,seller_client_id))
+                db.commit()
+
+            #revert nft ownership back to seller
+            cursor.execute(nft_address_update_sql, (seller_ethereum_address,token_id))
             db.commit()
 
             # update query
             cursor.execute(cancel_transaction_sql, (tr_id,))
-            #todo - after cancelling transaction - what to do?
             db.commit()
         return redirect(url_for("transaction_history"))
 
