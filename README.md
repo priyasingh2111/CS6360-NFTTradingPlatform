@@ -2,7 +2,7 @@
 # CS6360-NFT-CourseProject
 
 A web based NFT trading application. An easy-to-use software for NFT traders who are trying to
-buy and sell NFTs. 
+buy and sell NFTs. The database for this application is being hosted on AWS.
 ## Deployment
 
 Download all the necessary libraries
